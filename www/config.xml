@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="net.edrake.racerdoge" version="1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Racer Doge</name>
+    <description>
+		Race your Doge car to the finish!
+    </description>
+    <author email="drakee@gmail.com" href="https://github.com/psydrake">
+        Drake Emko
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+</widget>
