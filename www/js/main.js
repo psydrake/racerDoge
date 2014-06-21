@@ -36,7 +36,15 @@ window.onload = function() {
 	// 5 - Game settings
 	game.fps = 30;
 	//game.scale = 1;
-	game.scale = .462
+	if (screenSize.width > 694 && screenSize.height > 954) {
+		game.scale = 1;
+	}
+	else {
+		//game.scale = .462
+		var scale1 = screenSize.width / 694;
+		var scale2 = screenSize.height / 954;
+		game.scale = scale1 > scale2 ? scale2 : scale1;
+	}
 	game.onload = function() {
 		// Once Game finishes loading
 		var scene = new SceneGame();
@@ -49,7 +57,7 @@ window.onload = function() {
 	var SceneGame = Class.create(Scene, {
 		// The main gameplay scene.     
 		initialize: function() {
-			var game, label, bg, penguin, iceGroup;
+			var game, label, bg, car, dogecoinGroup;
 			
 			// 1 - Call superclass constructor
 			Scene.apply(this);
@@ -70,21 +78,21 @@ window.onload = function() {
 			bg = new Sprite(694, 954);
 			bg.image = game.assets['img/gameBg.png'];
 
-			// Penguin
-			penguin = new Penguin();
-			penguin.x = game.width/2 - penguin.width/2;
-			//penguin.y = 280;
-			penguin.y = 606;
-			this.penguin = penguin;
+			// Car
+			car = new Car();
+			car.x = game.width/2 - car.width/2;
+			//car.y = 280;
+			car.y = 606;
+			this.car = car;
 
-			// Ice group
-			iceGroup = new Group();
-			this.iceGroup = iceGroup;
+			// Dogecoin group
+			dogecoinGroup = new Group();
+			this.dogecoinGroup = dogecoinGroup;
 
 			// 4 - Add child nodes        
 			this.addChild(bg);        
-			this.addChild(iceGroup);
-			this.addChild(penguin);
+			this.addChild(dogecoinGroup);
+			this.addChild(car);
 			this.addChild(label);
 
 			// Touch listener
@@ -94,7 +102,7 @@ window.onload = function() {
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 
 			// Instance variables
-			this.generateIceTimer = 0;
+			this.generateDogecoinTimer = 0;
 			this.scoreTimer = 0;
 			this.score = 0;
 
@@ -110,7 +118,7 @@ window.onload = function() {
 			laneWidth = 694/3;
 			lane = Math.floor(evt.x/laneWidth);
 			lane = Math.max(Math.min(2,lane),0);
-			this.penguin.switchToLaneNumber(lane);
+			this.car.switchToLaneNumber(lane);
 		},
 
 		setScore: function (value) {
@@ -127,22 +135,23 @@ window.onload = function() {
 			}
 
 			// Check if it's time to create a new set of obstacles
-			this.generateIceTimer += evt.elapsed * 0.001;
-			if (this.generateIceTimer >= 0.5) {
-				var ice;
-				this.generateIceTimer -= 0.5;
-				ice = new Ice(Math.floor(Math.random()*3));
-				this.iceGroup.addChild(ice);
+			this.generateDogecoinTimer += evt.elapsed * 0.001;
+			var  timeBeforeNext = 2; // increase to make coins more rare
+			if (this.generateDogecoinTimer >= timeBeforeNext) { 
+				var dogecoin;
+				this.generateDogecoinTimer -= timeBeforeNext;
+				dogecoin = new Dogecoin(Math.floor(Math.random()*3));
+				this.dogecoinGroup.addChild(dogecoin);
 			}
 
 			// Check collision
-			for (var i = this.iceGroup.childNodes.length - 1; i >= 0; i--) {
-				var ice = this.iceGroup.childNodes[i];
+			for (var i = this.dogecoinGroup.childNodes.length - 1; i >= 0; i--) {
+				var dogecoin = this.dogecoinGroup.childNodes[i];
 
-				if (ice.intersect(this.penguin)){
+				if (dogecoin.intersect(this.car)){
 					var game = Game.instance;
 					//game.assets['snd/Hit.mp3'].play();
-					this.iceGroup.removeChild(ice);    
+					this.dogecoinGroup.removeChild(dogecoin);    
 
 					// Game over
 				    //this.bgm.stop();
@@ -157,8 +166,8 @@ window.onload = function() {
 		}
 	});
 
-	// Penguin
-	var Penguin = Class.create(Sprite, {
+	// Car
+	var Car = Class.create(Sprite, {
 		// The player character.     
 		initialize: function() {
 			// 1 - Call superclass constructor
@@ -185,9 +194,9 @@ window.onload = function() {
 		}
 	});
 
-	// Ice Boulder
-	var Ice = Class.create(Sprite, {
-		// The obstacle that the penguin must avoid
+	// Dogecoin Boulder
+	var Dogecoin = Class.create(Sprite, {
+		// The obstacle that the car must avoid
 		initialize: function(lane) {
 			// Call superclass constructor
 			//Sprite.apply(this,[48, 49]);
@@ -201,7 +210,8 @@ window.onload = function() {
 		setLane: function(lane) {
 			var game, distance;
 			game = Game.instance;        
-			distance = 90;
+			//distance = 90;
+			distance = 195;
 			
 			this.rotationSpeed = Math.random() * 100 - 50;
 			
