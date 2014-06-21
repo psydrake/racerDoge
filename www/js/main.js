@@ -10,21 +10,33 @@ var bgm = new Media("/android_asset/bgm.mp3",
     }
 );
 */
+// first get the size from the window
+// if that didn't work, get it from the body
+var screenSize = {
+  width: window.innerWidth || document.body.clientWidth,
+  height: window.innerHeight || document.body.clientHeight
+}
+
 // 2 - On document load 
 window.onload = function() {
 	// 3 - Starting point
 	//var game = new Game(320, 440);
-	var screenWidth = 320;
-	var screenHeight = 440;
+
+	console.log('screenSize:', screenSize);
+	//var screenWidth = 320;
+	var screenWidth = 694;
+	//var screenHeight = 440;
+	var screenHeight = 954;
 	var game = new Game(screenWidth, screenHeight);
 
 	// 4 - Preload resources
 	//game.preload('img/BG.png', 'img/penguinSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
-	game.preload('img/BG.png', 'img/dogeCarSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
+	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin104.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 
 	// 5 - Game settings
 	game.fps = 30;
-	game.scale = 1;
+	//game.scale = 1;
+	game.scale = .462
 	game.onload = function() {
 		// Once Game finishes loading
 		var scene = new SceneGame();
@@ -49,18 +61,20 @@ window.onload = function() {
 			label.x = 9;
 			label.y = 32;        
 			label.color = 'white';
-			label.font = '16px strong';
+			label.font = '32px strong';
 			label.textAlign = 'center';
 			label._style.textShadow ="-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black";
 			this.scoreLabel = label;
 
-			bg = new Sprite(320,440);
-			bg.image = game.assets['img/BG.png'];
+			//bg = new Sprite(320,440);
+			bg = new Sprite(694, 954);
+			bg.image = game.assets['img/gameBg.png'];
 
 			// Penguin
 			penguin = new Penguin();
 			penguin.x = game.width/2 - penguin.width/2;
-			penguin.y = 280;
+			//penguin.y = 280;
+			penguin.y = 606;
 			this.penguin = penguin;
 
 			// Ice group
@@ -92,7 +106,8 @@ window.onload = function() {
 
 		handleTouchControl: function (evt) {
 			var laneWidth, lane;
-			laneWidth = 320/3;
+			//laneWidth = 320/3;
+			laneWidth = 694/3;
 			lane = Math.floor(evt.x/laneWidth);
 			lane = Math.max(Math.min(2,lane),0);
 			this.penguin.switchToLaneNumber(lane);
@@ -135,7 +150,6 @@ window.onload = function() {
 				    break;
 				}
 			}
-
 			// Loop BGM
 			//if (this.bgm.currentTime >= this.bgm.duration ){
 			//	this.bgm.play();
@@ -149,7 +163,7 @@ window.onload = function() {
 		initialize: function() {
 			// 1 - Call superclass constructor
 			//Sprite.apply(this,[30, 43]);
-			Sprite.apply(this,[45, 55]);
+			Sprite.apply(this,[65, 82]);
 			this.image = Game.instance.assets['img/dogeCarSheet.png'];
 			// 2 - Animate
 			this.animationDuration = 0;
@@ -165,7 +179,8 @@ window.onload = function() {
 		},
 
 		switchToLaneNumber: function(lane){     
-			var targetX = 160 - this.width/2 + (lane-1)*90;
+			//var targetX = 160 - this.width/2 + (lane-1)*90;
+			var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
 			this.x = targetX;
 		}
 	});
@@ -175,8 +190,9 @@ window.onload = function() {
 		// The obstacle that the penguin must avoid
 		initialize: function(lane) {
 			// Call superclass constructor
-			Sprite.apply(this,[48, 49]);
-			this.image  = Game.instance.assets['img/Ice.png'];      
+			//Sprite.apply(this,[48, 49]);
+			Sprite.apply(this,[104, 104]);
+			this.image  = Game.instance.assets['img/dogecoin104.png'];      
 			this.rotationSpeed = 0;
 			this.setLane(lane);
 			this.addEventListener(Event.ENTER_FRAME, this.update);
@@ -198,7 +214,8 @@ window.onload = function() {
 			var ySpeed, game;
 			
 			game = Game.instance;
-			ySpeed = 300;
+			//ySpeed = 300;
+			ySpeed = 150;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
 			this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
@@ -219,18 +236,22 @@ window.onload = function() {
 
 			// Game Over label
 			gameOverLabel = new Label("GAME OVER<br>Tap to Restart");
-			gameOverLabel.x = 8;
-			gameOverLabel.y = 128;
+			//gameOverLabel.x = 8;
+			gameOverLabel.x = 18;
+			//gameOverLabel.y = 128;
+			gameOverLabel.y = 278;
 			gameOverLabel.color = 'white';
-			gameOverLabel.font = '32px strong';
+			gameOverLabel.font = '64px strong';
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
 			scoreLabel = new Label('SCORE<br>' + score);
-			scoreLabel.x = 9;
-			scoreLabel.y = 32;        
+			//scoreLabel.x = 9;
+			scoreLabel.x = 20;
+			//scoreLabel.y = 32;        
+			scoreLabel.y = 70;        
 			scoreLabel.color = 'white';
-			scoreLabel.font = '16px strong';
+			scoreLabel.font = '32px strong';
 			scoreLabel.textAlign = 'center';
 
 			// Add labels

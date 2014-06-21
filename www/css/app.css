@@ -1,7 +1,12 @@
 /* app css stylesheet */
 
 body {
-    font-family: acme, tahoma, arial, sans-serif;
+    font-family:"Comic Sans MS", sans-serif;
+    /*padding-top: 20px;*/
+    /*padding-bottom: 60px;*/
+	/*background-image:url(../img/thedoge.jpg);*/
+	background: black;
+    /*font-family: acme, tahoma, arial, sans-serif;*/
 }
 
 .menu {
@@ -43,10 +48,10 @@ body {
 
 .nav { padding-top: 10px; }
 
-body {
-    padding-top: 20px;
-    padding-bottom: 60px;
-	background-image:url(../img/background.jpg);
+#enchant-stage {
+	/*position: relative !important;*/
+	margin-left: auto;
+    margin-right: auto;
 }
 
 /* Custom container */
