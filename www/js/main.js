@@ -17,6 +17,8 @@ var screenSize = {
   height: window.innerHeight || document.body.clientHeight
 }
 
+var carSpeed = 300; // speed of still objects passing by
+
 // 2 - On document load 
 window.onload = function() {
 	// 3 - Starting point
@@ -33,7 +35,7 @@ window.onload = function() {
 	//game.preload('img/BG.png', 'img/penguinSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCar60x93.png', 'img/yellowCar60x93.png', 
-		'img/jeep60x83.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
+		'img/jeep60x83.png', 'img/summerTree60.png', 'img/summerPineTree60.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 
 	// 5 - Game settings
 	game.fps = 30;
@@ -87,16 +89,16 @@ window.onload = function() {
 			car.y = 606;
 			this.car = car;
 
-			// NPC Car groups
-			this.simpleCarGroup = new Group();
-
-			// Coin groups
+			// object groups
+			this.enemyGroup = new Group();
 			this.coinGroup = new Group();
+			this.sceneryGroup = new Group();
 
 			// 4 - Add child nodes        
 			this.addChild(bg);
+			this.addChild(this.sceneryGroup);
 			this.addChild(this.coinGroup);
-			this.addChild(this.simpleCarGroup);
+			this.addChild(this.enemyGroup);
 			this.addChild(car);
 			this.addChild(label);
 
@@ -107,6 +109,7 @@ window.onload = function() {
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 
 			// Instance variables
+			this.generateSceneryTimer = 0;
 			this.generateCoinTimer = 0;
 			this.generateSimpleCarTimer = 0;
 			this.scoreTimer = 0;
@@ -147,16 +150,16 @@ window.onload = function() {
 				this.generateSimpleCarTimer -= timeBeforeNext;
 
 				var simpleCar = Math.floor(Math.random() * 2) === 0 ? new NPCVehicle(Math.floor(Math.random()*3), 'img/greenCarSheet.png') : new NPCVehicle(Math.floor(Math.random()*3), 'img/blueCarSheet.png');
-				this.simpleCarGroup.addChild(simpleCar);
+				this.enemyGroup.addChild(simpleCar);
 			}
 			// Check collision
-			for (var i = this.simpleCarGroup.childNodes.length - 1; i >= 0; i--) {
-				var simpleCar = this.simpleCarGroup.childNodes[i];
+			for (var i = this.enemyGroup.childNodes.length - 1; i >= 0; i--) {
+				var simpleCar = this.enemyGroup.childNodes[i];
 
 				if (simpleCar.intersect(this.car)){
 					var game = Game.instance;
 					//game.assets['snd/Hit.mp3'].play();
-					this.simpleCarGroup.removeChild(simpleCar);    
+					this.enemyGroup.removeChild(simpleCar);    
 					// Game over
 				    //this.bgm.stop();
 					game.replaceScene(new SceneGameOver(this.score));        
@@ -164,12 +167,12 @@ window.onload = function() {
 				}
 			}
 
-			// Check if it's time to create a new set of obstacles
+			// Check if it's time to create a new set of coins
 			this.generateCoinTimer += evt.elapsed * 0.001;
 			var  timeBeforeNext = 10; // increase to make coins more rare
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
-				var coin = (Math.floor(Math.random()) * 5) === 0 ? new Coin(Math.floor(Math.random()*3), 'pandacoin') : new Coin(Math.floor(Math.random()*3), 'dogecoin');
+				var coin = Math.floor(Math.random() * 5) === 0 ? new Coin(Math.floor(Math.random()*3), 'pandacoin') : new Coin(Math.floor(Math.random()*3), 'dogecoin');
 				this.coinGroup.addChild(coin);
 			}
 			// Check collision
@@ -182,7 +185,29 @@ window.onload = function() {
 					this.coinGroup.removeChild(coin);    
 					this.score += coin.name === 'dogecoin' ? 5 : 10;
 				}
+
+				// Enemy cars can pick up coins too
+				for (var j = this.enemyGroup.childNodes.length - 1; j >= 0; j--) {
+					var enemy = this.enemyGroup.childNodes[j];
+					if (coin.intersect(enemy)) {
+						var game = Game.instance;
+						//game.assets['snd/Hit.mp3'].play();
+						this.coinGroup.removeChild(coin);    
+					}
+				}
+
 			}
+
+			// Check if it's time to create a new set of scenery
+			this.generateSceneryTimer += evt.elapsed * 0.001;
+			var  timeBeforeNext = 5; // increase to make scenery more rare
+			if (this.generateSceneryTimer >= timeBeforeNext) { 
+				this.generateSceneryTimer -= timeBeforeNext;
+
+				var scenery = Math.floor(Math.random() * 2) === 0 ? new Scenery('img/summerTree60.png') : new Scenery('img/summerPineTree60.png');
+				this.sceneryGroup.addChild(scenery);
+			}
+
 			// Loop BGM
 			//if (this.bgm.currentTime >= this.bgm.duration ){
 			//	this.bgm.play();
@@ -268,7 +293,7 @@ window.onload = function() {
 		}
 	});
 /*
-	var BlueCar = Class.create(NPCVehicle, {
+	Var BlueCar = Class.create(NPCVehicle, {
 		initialize: function(lane, 'img/blueCarSheet.png') {
 			// Call superclass constructor
 			//Sprite.apply(this,[48, 49]);
@@ -306,11 +331,45 @@ window.onload = function() {
 			var ySpeed, game;
 			
 			game = Game.instance;
-			ySpeed = 300;
+			ySpeed = carSpeed;
 			//ySpeed = 150;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
 			this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
+			if (this.y > game.height) {
+				this.parentNode.removeChild(this);        
+			}
+		}
+	});
+
+	// Abstract Non-player-character Car class
+	var Scenery = Class.create(Sprite, {
+		initialize: function(imgPath) {
+			// Call superclass constructor
+			Sprite.apply(this,[64, 64]);
+			this.image  = Game.instance.assets[imgPath];
+
+			this.animationDuration = 0;
+			this.rotationSpeed = 0;
+			this.setXPos();
+			this.addEventListener(Event.ENTER_FRAME, this.update);
+		},
+
+		setXPos: function() {
+			var game = Game.instance;        
+			//var distance = 195;
+			//this.x = game.width/2 - this.width/2 + (Math.floor(Math.random() * 3) - 1) * distance;
+			this.x = Math.floor(Math.random() * 2) === 0 ? this.width / 2 : game.width - (this.width * 1.5);
+			this.y = -this.height;    
+			//console.log('set xpos to:', this.x);
+		},
+
+		update: function(evt) { 
+			var game = Game.instance;
+			var ySpeed = carSpeed;
+
+			this.y += ySpeed * evt.elapsed * 0.001;
+			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
 			if (this.y > game.height) {
 				this.parentNode.removeChild(this);        
 			}
@@ -333,7 +392,7 @@ window.onload = function() {
 			gameOverLabel.y = 128;
 			//gameOverLabel.y = 278;
 			gameOverLabel.color = 'white';
-			gameOverLabel.font = '64px strong';
+			gameOverLabel.font = '32px strong';
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
@@ -343,7 +402,7 @@ window.onload = function() {
 			scoreLabel.y = 32;        
 			//scoreLabel.y = 70;        
 			scoreLabel.color = 'white';
-			scoreLabel.font = '32px strong';
+			scoreLabel.font = '16px strong';
 			scoreLabel.textAlign = 'center';
 
 			// Add labels
