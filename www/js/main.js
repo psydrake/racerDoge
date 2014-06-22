@@ -91,13 +91,11 @@ window.onload = function() {
 			this.simpleCarGroup = new Group();
 
 			// Coin groups
-			this.dogecoinGroup = new Group();
-			this.pandacoinGroup = new Group();
+			this.coinGroup = new Group();
 
 			// 4 - Add child nodes        
 			this.addChild(bg);
-			this.addChild(this.dogecoinGroup);
-			this.addChild(this.pandacoinGroup);
+			this.addChild(this.coinGroup);
 			this.addChild(this.simpleCarGroup);
 			this.addChild(car);
 			this.addChild(label);
@@ -109,8 +107,7 @@ window.onload = function() {
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 
 			// Instance variables
-			this.generateDogecoinTimer = 0;
-			this.generatePandacoinTimer = 0;
+			this.generateCoinTimer = 0;
 			this.generateSimpleCarTimer = 0;
 			this.scoreTimer = 0;
 			this.score = 0;
@@ -168,42 +165,22 @@ window.onload = function() {
 			}
 
 			// Check if it's time to create a new set of obstacles
-			this.generateDogecoinTimer += evt.elapsed * 0.001;
+			this.generateCoinTimer += evt.elapsed * 0.001;
 			var  timeBeforeNext = 10; // increase to make coins more rare
-			if (this.generateDogecoinTimer >= timeBeforeNext) { 
-				this.generateDogecoinTimer -= timeBeforeNext;
-				var dogecoin = new Dogecoin(Math.floor(Math.random()*3));
-				this.dogecoinGroup.addChild(dogecoin);
+			if (this.generateCoinTimer >= timeBeforeNext) { 
+				this.generateCoinTimer -= timeBeforeNext;
+				var coin = (Math.floor(Math.random()) * 5) === 0 ? new Coin(Math.floor(Math.random()*3), 'pandacoin') : new Coin(Math.floor(Math.random()*3), 'dogecoin');
+				this.coinGroup.addChild(coin);
 			}
 			// Check collision
-			for (var i = this.dogecoinGroup.childNodes.length - 1; i >= 0; i--) {
-				var dogecoin = this.dogecoinGroup.childNodes[i];
+			for (var i = this.coinGroup.childNodes.length - 1; i >= 0; i--) {
+				var coin = this.coinGroup.childNodes[i];
 
-				if (dogecoin.intersect(this.car)){
+				if (coin.intersect(this.car)){
 					var game = Game.instance;
 					//game.assets['snd/Hit.mp3'].play();
-					this.dogecoinGroup.removeChild(dogecoin);    
-					this.score += 5;
-				}
-			}
-
-			// Check if it's time to create a new set of obstacles
-			this.generatePandacoinTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = 20; // increase to make coins more rare
-			if (this.generatePandacoinTimer >= timeBeforeNext) { 
-				this.generatePandacoinTimer -= timeBeforeNext;
-				var pandacoin = new Pandacoin(Math.floor(Math.random()*3));
-				this.pandacoinGroup.addChild(pandacoin);
-			}
-			// Check collision
-			for (var i = this.pandacoinGroup.childNodes.length - 1; i >= 0; i--) {
-				var pandacoin = this.pandacoinGroup.childNodes[i];
-
-				if (pandacoin.intersect(this.car)){
-					var game = Game.instance;
-					//game.assets['snd/Hit.mp3'].play();
-					this.pandacoinGroup.removeChild(pandacoin);
-					this.score += 10;
+					this.coinGroup.removeChild(coin);    
+					this.score += coin.name === 'dogecoin' ? 5 : 10;
 				}
 			}
 			// Loop BGM
@@ -302,11 +279,21 @@ window.onload = function() {
 */
 	// Abstract Coin class
 	var Coin = Class.create(Sprite, {
+		initialize: function(lane, name) {
+			// Call superclass constructor
+			//Sprite.apply(this,[48, 49]);
+			this.name = name;
+			Sprite.apply(this,[64, 64]);
+			this.image  = Game.instance.assets['img/' + name + '64.png'];
+			this.rotationSpeed = 0;
+			this.setLane(lane);
+			this.addEventListener(Event.ENTER_FRAME, this.update);
+		},
+
 		setLane: function(lane) {
-			var game, distance;
-			game = Game.instance;        
+			var game = Game.instance;        
 			//distance = 90; // multiply by 2.166 to get 195
-			distance = 195;
+			var distance = 195;
 			
 			this.rotationSpeed = Math.random() * 100 - 50;
 			
@@ -328,30 +315,6 @@ window.onload = function() {
 				this.parentNode.removeChild(this);        
 			}
 		}
-	});
-
-	var Dogecoin = Class.create(Coin, {
-		initialize: function(lane) {
-			// Call superclass constructor
-			//Sprite.apply(this,[48, 49]);
-			Sprite.apply(this,[64, 64]);
-			this.image  = Game.instance.assets['img/dogecoin64.png'];
-			this.rotationSpeed = 0;
-			this.setLane(lane);
-			this.addEventListener(Event.ENTER_FRAME, this.update);
-		},
-	});
-
-	var Pandacoin = Class.create(Coin, {
-		initialize: function(lane) {
-			// Call superclass constructor
-			//Sprite.apply(this,[48, 49]);
-			Sprite.apply(this,[64, 64]);
-			this.image  = Game.instance.assets['img/pandacoin64.png'];
-			this.rotationSpeed = 0;
-			this.setLane(lane);
-			this.addEventListener(Event.ENTER_FRAME, this.update);
-		},
 	});
 
 	// SceneGameOver  
