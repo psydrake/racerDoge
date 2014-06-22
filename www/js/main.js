@@ -31,7 +31,9 @@ window.onload = function() {
 
 	// 4 - Preload resources
 	//game.preload('img/BG.png', 'img/penguinSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
-	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin104.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
+	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
+		'img/greenCar39x82.png', 'img/blueCar39x82.png', 'img/greyCar60x93.png', 'img/yellowCar60x93.png', 
+		'img/jeep60x83.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 
 	// 5 - Game settings
 	game.fps = 30;
@@ -57,7 +59,7 @@ window.onload = function() {
 	var SceneGame = Class.create(Scene, {
 		// The main gameplay scene.     
 		initialize: function() {
-			var game, label, bg, car, dogecoinGroup;
+			var game, label, bg, car, dogecoinGroup, pandacoinGroup;
 			
 			// 1 - Call superclass constructor
 			Scene.apply(this);
@@ -88,10 +90,13 @@ window.onload = function() {
 			// Dogecoin group
 			dogecoinGroup = new Group();
 			this.dogecoinGroup = dogecoinGroup;
+			pandacoinGroup = new Group();
+			this.pandacoinGroup = pandacoinGroup;
 
 			// 4 - Add child nodes        
 			this.addChild(bg);        
 			this.addChild(dogecoinGroup);
+			this.addChild(pandacoinGroup);
 			this.addChild(car);
 			this.addChild(label);
 
@@ -103,6 +108,7 @@ window.onload = function() {
 
 			// Instance variables
 			this.generateDogecoinTimer = 0;
+			this.generatePandacoinTimer = 0;
 			this.scoreTimer = 0;
 			this.score = 0;
 
@@ -138,12 +144,10 @@ window.onload = function() {
 			this.generateDogecoinTimer += evt.elapsed * 0.001;
 			var  timeBeforeNext = 2; // increase to make coins more rare
 			if (this.generateDogecoinTimer >= timeBeforeNext) { 
-				var dogecoin;
 				this.generateDogecoinTimer -= timeBeforeNext;
-				dogecoin = new Dogecoin(Math.floor(Math.random()*3));
+				var dogecoin = new Dogecoin(Math.floor(Math.random()*3));
 				this.dogecoinGroup.addChild(dogecoin);
 			}
-
 			// Check collision
 			for (var i = this.dogecoinGroup.childNodes.length - 1; i >= 0; i--) {
 				var dogecoin = this.dogecoinGroup.childNodes[i];
@@ -157,6 +161,26 @@ window.onload = function() {
 				    //this.bgm.stop();
 					game.replaceScene(new SceneGameOver(this.score));        
 				    break;
+				}
+			}
+
+			// Check if it's time to create a new set of obstacles
+			this.generatePandacoinTimer += evt.elapsed * 0.001;
+			var  timeBeforeNext = 10; // increase to make coins more rare
+			if (this.generatePandacoinTimer >= timeBeforeNext) { 
+				this.generatePandacoinTimer -= timeBeforeNext;
+				var pandacoin = new Pandacoin(Math.floor(Math.random()*3));
+				this.pandacoinGroup.addChild(pandacoin);
+			}
+			// Check collision
+			for (var i = this.pandacoinGroup.childNodes.length - 1; i >= 0; i--) {
+				var pandacoin = this.pandacoinGroup.childNodes[i];
+
+				if (pandacoin.intersect(this.car)){
+					var game = Game.instance;
+					//game.assets['snd/Hit.mp3'].play();
+					this.pandacoinGroup.removeChild(pandacoin);
+					this.score += 10;
 				}
 			}
 			// Loop BGM
@@ -194,38 +218,27 @@ window.onload = function() {
 		}
 	});
 
-	// Dogecoin Boulder
-	var Dogecoin = Class.create(Sprite, {
-		// The obstacle that the car must avoid
-		initialize: function(lane) {
-			// Call superclass constructor
-			//Sprite.apply(this,[48, 49]);
-			Sprite.apply(this,[104, 104]);
-			this.image  = Game.instance.assets['img/dogecoin104.png'];      
-			this.rotationSpeed = 0;
-			this.setLane(lane);
-			this.addEventListener(Event.ENTER_FRAME, this.update);
-		},
-
+	// Abstract Coin class
+	var Coin = Class.create(Sprite, {
 		setLane: function(lane) {
 			var game, distance;
 			game = Game.instance;        
-			//distance = 90;
+			//distance = 90; // multiply by 2.166 to get 195
 			distance = 195;
 			
 			this.rotationSpeed = Math.random() * 100 - 50;
 			
 			this.x = game.width/2 - this.width/2 + (lane - 1) * distance;
 			this.y = -this.height;    
-			this.rotation = Math.floor( Math.random() * 360 );    
+			this.rotation = Math.floor(Math.random() * 360);
 		},
 
 		update: function(evt) { 
 			var ySpeed, game;
 			
 			game = Game.instance;
-			//ySpeed = 300;
-			ySpeed = 150;
+			ySpeed = 300;
+			//ySpeed = 150;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
 			this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
@@ -233,6 +246,30 @@ window.onload = function() {
 				this.parentNode.removeChild(this);        
 			}
 		}
+	});
+
+	var Dogecoin = Class.create(Coin, {
+		initialize: function(lane) {
+			// Call superclass constructor
+			//Sprite.apply(this,[48, 49]);
+			Sprite.apply(this,[64, 64]);
+			this.image  = Game.instance.assets['img/dogecoin64.png'];
+			this.rotationSpeed = 0;
+			this.setLane(lane);
+			this.addEventListener(Event.ENTER_FRAME, this.update);
+		},
+	});
+
+	var Pandacoin = Class.create(Coin, {
+		initialize: function(lane) {
+			// Call superclass constructor
+			//Sprite.apply(this,[48, 49]);
+			Sprite.apply(this,[64, 64]);
+			this.image  = Game.instance.assets['img/pandacoin64.png'];
+			this.rotationSpeed = 0;
+			this.setLane(lane);
+			this.addEventListener(Event.ENTER_FRAME, this.update);
+		},
 	});
 
 	// SceneGameOver  
@@ -245,7 +282,7 @@ window.onload = function() {
 			//	this.backgroundColor = 'rgb(0,0,0)'; // RGB value version
 
 			// Game Over label
-			gameOverLabel = new Label("GAME OVER<br>Tap to Restart");
+			gameOverLabel = new Label("GAME OVER<br/><br/>Tap to Restart");
 			//gameOverLabel.x = 8;
 			gameOverLabel.x = 18;
 			//gameOverLabel.y = 128;
@@ -255,7 +292,7 @@ window.onload = function() {
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
-			scoreLabel = new Label('SCORE<br>' + score);
+			scoreLabel = new Label('SCORE<br/><br/>' + score);
 			//scoreLabel.x = 9;
 			scoreLabel.x = 20;
 			//scoreLabel.y = 32;        
