@@ -17,18 +17,21 @@ var screenSize = {
   height: window.innerHeight || document.body.clientHeight
 }
 
+var screenWidth = 694;
+var screenHeight = 954;
+var leftBorder = 112;
+var rightBorder = 518;
 var carSpeed = 300; // speed of still objects passing by
+var firstSceneryMoment = true; // game is just started, no scenery has been shown yet
 
 // 2 - On document load 
 window.onload = function() {
 	// 3 - Starting point
 	//var game = new Game(320, 440);
-
 	console.log('screenSize:', screenSize);
 	//var screenWidth = 320;
-	var screenWidth = 694;
 	//var screenHeight = 440;
-	var screenHeight = 954;
+
 	var game = new Game(screenWidth, screenHeight);
 
 	// 4 - Preload resources
@@ -40,13 +43,13 @@ window.onload = function() {
 	// 5 - Game settings
 	game.fps = 30;
 	//game.scale = 1;
-	if (screenSize.width > 694 && screenSize.height > 954) {
+	if (screenSize.width > 694 && screenSize.height > screenHeight) {
 		game.scale = 1;
 	}
 	else {
 		//game.scale = .462
-		var scale1 = screenSize.width / 694;
-		var scale2 = screenSize.height / 954;
+		var scale1 = screenSize.width / screenWidth;
+		var scale2 = screenSize.height / screenHeight;
 		game.scale = scale1 > scale2 ? scale2 : scale1;
 	}
 	game.onload = function() {
@@ -79,7 +82,7 @@ window.onload = function() {
 			this.scoreLabel = label;
 
 			//bg = new Sprite(320,440);
-			bg = new Sprite(694, 954);
+			bg = new Sprite(screenWidth, screenHeight);
 			bg.image = game.assets['img/gameBg.png'];
 
 			// Car
@@ -103,7 +106,9 @@ window.onload = function() {
 			this.addChild(label);
 
 			// Touch listener
-			this.addEventListener(Event.TOUCH_START,this.handleTouchControl);
+			this.addEventListener(Event.TOUCH_MOVE, this.handleTouchMove);
+			this.addEventListener(Event.TOUCH_START, this.handleTouchStart);
+			this.addEventListener(Event.TOUCH_END, this.handleTouchStop);
 
 			// Update
 			this.addEventListener(Event.ENTER_FRAME, this.update);
@@ -121,13 +126,45 @@ window.onload = function() {
 			//this.bgm.play();
 		},
 
-		handleTouchControl: function (evt) {
-			var laneWidth, lane;
+		// user clicks on area of screen
+		handleTouchStart: function (evt) {
+			console.log('START');
 			//laneWidth = 320/3;
-			laneWidth = 694/3;
-			lane = Math.floor(evt.x/laneWidth);
-			lane = Math.max(Math.min(2,lane),0);
-			this.car.switchToLaneNumber(lane);
+			//var laneWidth = screenWidth/3;
+			//var laneWidth = screenWidth/2;
+			//var direction = Math.floor(evt.x / laneWidth);
+			//direction = Math.max(Math.min(2,direction),0);
+			this.car.isSteering = true;
+			this.keepSteering(evt);
+		},
+
+		keepSteering: function(evt) {
+			//var direction = evt.x < this.car.x ? 0 : 1;
+			//this.car.move(direction, 10);
+
+			if (this.car.isSteering) {
+				window.setTimeout(function() {
+					//console.log('evt:', evt, ', this.car:', this.car);
+					if (this.car) {
+						var direction = evt.x < this.car.x ? 0 : 1;
+						this.car.move(direction, 10);
+						this.keepSteering();
+					}
+				}, 500);
+			}
+		},
+
+		handleTouchStop: function(evt) {
+			console.log('STOP');
+			this.car.isSteering = false;
+		},
+
+		// user drags car
+		handleTouchMove: function(evt) {
+			console.log('MOVE');
+			var direction = evt.x < this.car.x ? 0 : 1;
+			this.car.move(direction, 10);
+			//this.handleTouchStart(evt);
 		},
 
 		setScore: function (value) {
@@ -145,7 +182,7 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of obstacles
 			this.generateSimpleCarTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = 3; // increase to make coins more rare
+			var  timeBeforeNext = 5 + Math.floor(Math.random() * 5); // increase to make enemy cars more rare
 			if (this.generateSimpleCarTimer >= timeBeforeNext) { 
 				this.generateSimpleCarTimer -= timeBeforeNext;
 
@@ -169,7 +206,7 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of coins
 			this.generateCoinTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = 10; // increase to make coins more rare
+			var  timeBeforeNext = 10 + Math.floor(Math.random() * 5); // increase to make coins more rare
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
 				var coin = Math.floor(Math.random() * 5) === 0 ? new Coin(Math.floor(Math.random()*3), 'pandacoin') : new Coin(Math.floor(Math.random()*3), 'dogecoin');
@@ -200,12 +237,13 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of scenery
 			this.generateSceneryTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = 5; // increase to make scenery more rare
+			var  timeBeforeNext = firstSceneryMoment === true ? Math.floor(Math.random() * 2) : 5 + Math.floor(Math.random() * 3); // increase to make scenery more rare
 			if (this.generateSceneryTimer >= timeBeforeNext) { 
 				this.generateSceneryTimer -= timeBeforeNext;
 
 				var scenery = Math.floor(Math.random() * 2) === 0 ? new Scenery('img/summerTree60.png') : new Scenery('img/summerPineTree60.png');
 				this.sceneryGroup.addChild(scenery);
+				firstSceneryMoment = false;
 			}
 
 			// Loop BGM
@@ -225,6 +263,7 @@ window.onload = function() {
 			this.image = Game.instance.assets['img/dogeCarSheet.png'];
 			// 2 - Animate
 			this.animationDuration = 0;
+			this.isSteering = false;
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
@@ -236,16 +275,33 @@ window.onload = function() {
 			}
 		},
 
-		switchToLaneNumber: function(lane){     
+		/*switchToLaneNumber: function(lane){     
 			//var targetX = 160 - this.width/2 + (lane-1)*90;
 			var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
 			this.x = targetX;
+		},*/
+		move: function(direction, increment) {
+			//console.log('moving:', direction, ', amount:', increment);
+			//var targetX = 160 - this.width/2 + (lane-1)*90;
+			//var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
+			if (direction === 0) {
+				//this.x = targetX;
+				if (this.x >= leftBorder) {
+					this.x -= increment;
+				}
+			}
+			else {
+				if (this.x <= rightBorder) {
+					this.x += increment;
+				}
+			}
 		}
 	});
 
 	// Abstract Non-player-character Car class
 	var NPCVehicle = Class.create(Sprite, {
 		initialize: function(lane, imgPath) {
+			console.log('LANE:', lane);
 			// Call superclass constructor
 			Sprite.apply(this,[60, 126]);
 			this.image  = Game.instance.assets[imgPath];
@@ -253,34 +309,64 @@ window.onload = function() {
 			this.animationDuration = 0;
 			this.rotationSpeed = 0;
 			this.setLane(lane);
+			this.targetLane = lane; // car is moving to a different lane
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
 		setLane: function(lane) {
-			var game, distance;
-			game = Game.instance;        
+			var	game = Game.instance;        
 			//distance = 90; // multiply by 2.166 to get 195
-			distance = 195;
+			var distance = 195;
 			//this.rotationSpeed = Math.random() * 100 - 50;
 			//this.rotationSpeed = 0;
 			
 			this.x = game.width/2 - this.width/2 + (lane - 1) * distance;
 			this.y = -this.height;    
 			//this.rotation = Math.floor(Math.random() * 360);
+			this.lane = lane;
 		},
 
 		update: function(evt) { 
-			var ySpeed, game;
-			
-			game = Game.instance;
-			ySpeed = 100;
+			var game = Game.instance;
+			var ySpeed = 100;
 			//ySpeed = 150;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
 			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
 			if (this.y > game.height) {
 				this.parentNode.removeChild(this);        
+			}
+
+			// NPC car can move left and right as well
+			var targetLaneXPos = game.width/2 - this.width/2 + (this.targetLane - 1) * 195;
+			if (this.lane !== this.targetLane && this.x > targetLaneXPos - 5 && this.x < targetLaneXPos + 5) {
+				this.lane = this.targetLane;
+			}
+			else if (this.targetLane < this.lane) { // car is moving to a different lane
+				if (this.x <= leftBorder + 10) {
+					//this.targetLane = 0;
+					this.lane = this.targetLane;
+				}
+				else {
+					this.x -= 5;
+				}
+			}
+			else if (this.targetLane > this.lane) {
+				if (this.x >= rightBorder - 10) {
+					//this.targetLane = 2;
+					this.lane = this.targetLane;
+				}
+				else {
+					this.x += 5;
+				}
+			}
+			else {  // car is in the lane it wants to be
+				if (Math.floor(Math.random() * 10) === 0) {
+					// car wants to move to a different lane
+					this.targetLane = Math.floor(Math.random() * 3);
+					console.log('changed target lane to:', this.targetLane);
+				}
 			}
 		},
 
