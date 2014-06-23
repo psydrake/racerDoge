@@ -38,7 +38,7 @@ window.onload = function() {
 	// 4 - Preload resources
 	//game.preload('img/BG.png', 'img/penguinSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
-		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCar60x93.png', 'img/yellowCar60x93.png', 
+		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeep60x83.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 
 	// 5 - Game settings
@@ -235,9 +235,24 @@ window.onload = function() {
 			if (this.generateSimpleCarTimer >= timeBeforeNext) { 
 				this.generateSimpleCarTimer -= timeBeforeNext;
 
-				var simpleCar = Math.floor(Math.random() * 2) === 0 ? new NPCVehicle(Math.floor(Math.random()*3), 'img/greenCarSheet.png') : 
-					new NPCVehicle(Math.floor(Math.random()*3), 'img/blueCarSheet.png');
-				this.enemyGroup.addChild(simpleCar);
+				var car = null;
+				var carChoice = Math.floor(Math.random() * 6);
+				switch (carChoice) {
+					case 0:
+					case 1:
+						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/greenCarSheet.png', 60, 126, 6);
+						break;
+					case 2:
+					case 3:
+						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/blueCarSheet.png', 60, 126, 6);
+						break;
+					case 4:
+						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/yellowCarSheet.png', 76, 120, 8);
+						break;
+					default:
+						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/greyCarSheet.png', 77, 120, 8);
+				}
+				this.enemyGroup.addChild(car);
 			}
 			// Check collision
 			for (var i = this.enemyGroup.childNodes.length - 1; i >= 0; i--) {
@@ -373,11 +388,13 @@ window.onload = function() {
 
 	// Abstract Non-player-character Car class
 	var NPCVehicle = Class.create(Sprite, {
-		initialize: function(lane, imgPath) {
+		initialize: function(lane, imgPath, width, height, crazyConstant) {
 			console.log('LANE:', lane);
 			// Call superclass constructor
-			Sprite.apply(this,[60, 126]);
-			this.image = Game.instance.assets[imgPath];
+			//Sprite.apply(this,[60, 126]);
+			Sprite.apply(this,[width, height]);
+			this.image = Game.instance.assets[imgPath];	
+			this.crazyConstant = crazyConstant; // how crazy is the driver? number between 1-10 
 			this.ySpeed = 95 + Math.floor(Math.random() * 10);
 
 			this.animationDuration = 0;
@@ -437,7 +454,7 @@ window.onload = function() {
 				}
 			}
 			else {  // car is in the lane it wants to be
-				if (Math.floor(Math.random() * 15) === 0) {
+				if (Math.floor(Math.random() * (100 / this.crazyConstant)) === 0) {
 					// car wants to move to a different lane
 					this.targetLane = Math.floor(Math.random() * 3);
 					console.log('changed target lane to:', this.targetLane);
@@ -577,7 +594,7 @@ window.onload = function() {
 			var gameOverLabel = new Label("GAME OVER<br/><br/>Tap to Restart");
 			gameOverLabel.x = 8;
 			//gameOverLabel.x = 18;
-			gameOverLabel.y = 156;
+			gameOverLabel.y = 164;
 			//gameOverLabel.y = 278;
 			gameOverLabel.color = 'white';
 			gameOverLabel.font = '32px strong';
