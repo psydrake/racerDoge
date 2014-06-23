@@ -340,6 +340,7 @@ window.onload = function() {
 		initialize: function() {
 			// 1 - Call superclass constructor
 			//Sprite.apply(this,[30, 43]);
+			//Sprite.apply(this,[63, 80]);
 			Sprite.apply(this,[65, 82]);
 			this.image = Game.instance.assets['img/dogeCarSheet.png'];
 			// 2 - Animate
