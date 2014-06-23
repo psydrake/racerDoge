@@ -111,8 +111,8 @@ window.onload = function() {
 			// Touch listener
 			this.addEventListener(Event.TOUCH_MOVE, this.handleTouchMove);
 			this.addEventListener(Event.TOUCH_START, this.handleTouchStart);
-			this.addEventListener(Event.TOUCH_END, this.handleTouchStop);
-
+			//this.addEventListener(Event.TOUCH_END, this.handleTouchStop);
+	
 			// Update
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 
@@ -173,12 +173,12 @@ window.onload = function() {
 				}, 500);
 			}
 		},
-*/
+
 		handleTouchStop: function(evt) {
 			console.log('STOP');
 			this.car.isSteering = false;
 		},
-
+*/
 		// user drags car
 		handleTouchMove: function(evt) {
 			console.log('MOVE');
@@ -298,6 +298,20 @@ window.onload = function() {
 			//if (this.bgm.currentTime >= this.bgm.duration ){
 			//	this.bgm.play();
 			//}
+
+			var game = Game.instance;
+			if (game.input.left && !game.input.right) {
+    			this.car.move(-1, 0, 3);
+			}
+			else if (game.input.right && !game.input.left) {
+			    this.car.move(1, 0, 3);
+			}
+			else if (game.input.up && !game.input.down) {
+			    this.car.move(0, -1, 3);
+			}
+			else if (game.input.down && !game.input.up) {
+				this.car.move(0, 1, 3);
+			}			
 		}
 	});
 
@@ -563,7 +577,7 @@ window.onload = function() {
 			var gameOverLabel = new Label("GAME OVER<br/><br/>Tap to Restart");
 			gameOverLabel.x = 8;
 			//gameOverLabel.x = 18;
-			gameOverLabel.y = 128;
+			gameOverLabel.y = 156;
 			//gameOverLabel.y = 278;
 			gameOverLabel.color = 'white';
 			gameOverLabel.font = '32px strong';
