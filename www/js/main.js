@@ -21,8 +21,9 @@ var screenWidth = 694;
 var screenHeight = 954;
 var leftBorder = 112;
 var rightBorder = 518;
+var topBorder = 606;
+var bottomBorder = 870;
 var carSpeed = 300; // speed of still objects passing by
-var firstSceneryMoment = true; // game is just started, no scenery has been shown yet
 
 // 2 - On document load 
 window.onload = function() {
@@ -38,7 +39,7 @@ window.onload = function() {
 	//game.preload('img/BG.png', 'img/penguinSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCar60x93.png', 'img/yellowCar60x93.png', 
-		'img/jeep60x83.png', 'img/summerTree60.png', 'img/summerPineTree60.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
+		'img/jeep60x83.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 
 	// 5 - Game settings
 	game.fps = 30;
@@ -72,7 +73,7 @@ window.onload = function() {
 			game = Game.instance;
 			// 3 - Create child nodes
 			// Label
-			label = new Label('SCORE<br>0');
+			label = new Label('SCORE<br/>0');
 			label.x = 9;
 			label.y = 32;        
 			label.color = 'white';
@@ -89,16 +90,18 @@ window.onload = function() {
 			car = new Car();
 			car.x = game.width/2 - car.width/2;
 			//car.y = 280;
-			car.y = 606;
+			car.y = topBorder;
 			this.car = car;
 
 			// object groups
+			this.stripeGroup = new Group();
 			this.enemyGroup = new Group();
 			this.coinGroup = new Group();
 			this.sceneryGroup = new Group();
 
 			// 4 - Add child nodes        
 			this.addChild(bg);
+			this.addChild(this.stripeGroup);
 			this.addChild(this.sceneryGroup);
 			this.addChild(this.coinGroup);
 			this.addChild(this.enemyGroup);
@@ -114,6 +117,7 @@ window.onload = function() {
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 
 			// Instance variables
+			this.generateStripeTimer = 0;
 			this.generateSceneryTimer = 0;
 			this.generateCoinTimer = 0;
 			this.generateSimpleCarTimer = 0;
@@ -134,26 +138,42 @@ window.onload = function() {
 			//var laneWidth = screenWidth/2;
 			//var direction = Math.floor(evt.x / laneWidth);
 			//direction = Math.max(Math.min(2,direction),0);
-			this.car.isSteering = true;
-			this.keepSteering(evt);
-		},
 
+			//this.car.isSteering = true;
+			//this.keepSteering(evt);
+			this.handleTouchMove(evt);
+		},
+/*
 		keepSteering: function(evt) {
 			//var direction = evt.x < this.car.x ? 0 : 1;
 			//this.car.move(direction, 10);
-
 			if (this.car.isSteering) {
 				window.setTimeout(function() {
 					//console.log('evt:', evt, ', this.car:', this.car);
 					if (this.car) {
-						var direction = evt.x < this.car.x ? 0 : 1;
-						this.car.move(direction, 5);
+						var xdir = 0;
+						if (evt.x < this.car.x - 5) {
+							xdir = -1;
+						}
+						else if (evt.x > this.car.x + 5) {
+							 xdir = 1;
+						}
+
+						var ydir = 0;
+						if (evt.y < this.car.y - 5) {
+							ydir = -1;
+						}
+						else if (evt.y > this.car.y + 5) {
+							ydir = 1;
+						}
+
+						this.car.move(xdir, 5); //ydir, 5);
 						this.keepSteering();
 					}
 				}, 500);
 			}
 		},
-
+*/
 		handleTouchStop: function(evt) {
 			console.log('STOP');
 			this.car.isSteering = false;
@@ -162,14 +182,33 @@ window.onload = function() {
 		// user drags car
 		handleTouchMove: function(evt) {
 			console.log('MOVE');
-			var direction = evt.x < this.car.x ? 0 : 1;
-			this.car.move(direction, 5);
+			var xdir = 0;
+			if (evt.x < this.car.x - 5) {
+				xdir = -1;
+			}
+			else if (evt.x > this.car.x + 5) {
+				 xdir = 1;
+			}
+
+			console.log('evt.y:', evt.y, 'this.car.y:', this.car.y);
+			var ydir = 0;
+			if (evt.y < this.car.y - 5) {
+				ydir = -1;
+			}
+			else if (evt.y > this.car.y + 5) {
+				ydir = 1;
+			}
+
+			//var direction = evt.x < this.car.x ? 0 : 1;
+			this.car.move(xdir, ydir, 2);
+			//this.car.isSteering = true;
+			//this.keepSteering(evt);
 			//this.handleTouchStart(evt);
 		},
 
 		setScore: function (value) {
 		    this.score = value;
-		    this.scoreLabel.text = 'SCORE<br>' + this.score;
+		    this.scoreLabel.text = 'SCORE<br/>' + this.score;
 		},
 
 		update: function(evt) {
@@ -180,13 +219,24 @@ window.onload = function() {
 				this.scoreTimer -= 0.5;
 			}
 
+			// Check if it's time to create a new lane stripe
+			this.generateStripeTimer += evt.elapsed * 0.001;
+			var  timeBeforeNext = .5; // increase to make enemy cars more rare
+			if (this.generateStripeTimer >= timeBeforeNext) { 
+				this.generateStripeTimer -= timeBeforeNext;
+
+				var stripe = new Stripe('img/whiteLaneStripe8x40.png');
+				this.stripeGroup.addChild(stripe);
+			}
+
 			// Check if it's time to create a new set of obstacles
 			this.generateSimpleCarTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = 5 + Math.floor(Math.random() * 5); // increase to make enemy cars more rare
+			timeBeforeNext = 7 + Math.floor(Math.random() * 6); // increase to make enemy cars more rare
 			if (this.generateSimpleCarTimer >= timeBeforeNext) { 
 				this.generateSimpleCarTimer -= timeBeforeNext;
 
-				var simpleCar = Math.floor(Math.random() * 2) === 0 ? new NPCVehicle(Math.floor(Math.random()*3), 'img/greenCarSheet.png') : new NPCVehicle(Math.floor(Math.random()*3), 'img/blueCarSheet.png');
+				var simpleCar = Math.floor(Math.random() * 2) === 0 ? new NPCVehicle(Math.floor(Math.random()*3), 'img/greenCarSheet.png') : 
+					new NPCVehicle(Math.floor(Math.random()*3), 'img/blueCarSheet.png');
 				this.enemyGroup.addChild(simpleCar);
 			}
 			// Check collision
@@ -206,10 +256,11 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of coins
 			this.generateCoinTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = 10 + Math.floor(Math.random() * 5); // increase to make coins more rare
+			timeBeforeNext = 10 + Math.floor(Math.random() * 5); // increase to make coins more rare
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
-				var coin = Math.floor(Math.random() * 5) === 0 ? new Coin(Math.floor(Math.random()*3), 'pandacoin') : new Coin(Math.floor(Math.random()*3), 'dogecoin');
+				var coin = Math.floor(Math.random() * 5) === 0 ? new Coin(Math.floor(Math.random()*3), 'pandacoin') : 
+					new Coin(Math.floor(Math.random()*3), 'dogecoin');
 				this.coinGroup.addChild(coin);
 			}
 			// Check collision
@@ -222,7 +273,6 @@ window.onload = function() {
 					this.coinGroup.removeChild(coin);    
 					this.score += coin.name === 'dogecoin' ? 5 : 10;
 				}
-
 				// Enemy cars can pick up coins too
 				for (var j = this.enemyGroup.childNodes.length - 1; j >= 0; j--) {
 					var enemy = this.enemyGroup.childNodes[j];
@@ -232,12 +282,11 @@ window.onload = function() {
 						this.coinGroup.removeChild(coin);    
 					}
 				}
-
 			}
 
 			// Check if it's time to create a new set of scenery
 			this.generateSceneryTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = firstSceneryMoment === true ? Math.floor(Math.random() * 2) : 5 + Math.floor(Math.random() * 3); // increase to make scenery more rare
+			timeBeforeNext = 5 + Math.floor(Math.random() * 3); // increase to make scenery more rare
 			if (this.generateSceneryTimer >= timeBeforeNext) { 
 				this.generateSceneryTimer -= timeBeforeNext;
 
@@ -245,7 +294,6 @@ window.onload = function() {
 				this.sceneryGroup.addChild(scenery);
 				firstSceneryMoment = false;
 			}
-
 			// Loop BGM
 			//if (this.bgm.currentTime >= this.bgm.duration ){
 			//	this.bgm.play();
@@ -267,32 +315,43 @@ window.onload = function() {
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
-		updateAnimation: function (evt) {        
+		updateAnimation: function(evt) {
 			this.animationDuration += evt.elapsed * 0.001;       
 			if (this.animationDuration >= 0.25) {
 				this.frame = (this.frame + 1) % 2;
 				this.animationDuration -= 0.25;
 			}
 		},
-
 		/*switchToLaneNumber: function(lane){     
 			//var targetX = 160 - this.width/2 + (lane-1)*90;
 			var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
 			this.x = targetX;
 		},*/
-		move: function(direction, increment) {
-			//console.log('moving:', direction, ', amount:', increment);
+		move: function(xdir, ydir, increment) {
+			console.log('moving - xdir:', xdir, ', ydir:', ydir);
 			//var targetX = 160 - this.width/2 + (lane-1)*90;
 			//var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
-			if (direction === 0) {
-				//this.x = targetX;
+			if (xdir < 0) { // left
 				if (this.x >= leftBorder) {
 					this.x -= increment;
 				}
 			}
-			else {
+			else if (xdir > 0) { // right
 				if (this.x <= rightBorder) {
 					this.x += increment;
+				}
+			}
+
+			if (ydir < 0) { // up
+				console.log(this.y, '>= topBorder:', topBorder);
+				if (this.y >= topBorder) {
+					this.y -= increment;
+				}
+			}
+			else if (ydir > 0) { //down
+				console.log(this.y, '<= bottomBorder:', bottomBorder);
+				if (this.y <= bottomBorder) {
+					this.y += increment;
 				}
 			}
 		}
@@ -304,7 +363,8 @@ window.onload = function() {
 			console.log('LANE:', lane);
 			// Call superclass constructor
 			Sprite.apply(this,[60, 126]);
-			this.image  = Game.instance.assets[imgPath];
+			this.image = Game.instance.assets[imgPath];
+			this.ySpeed = 95 + Math.floor(Math.random() * 10);
 
 			this.animationDuration = 0;
 			this.rotationSpeed = 0;
@@ -340,7 +400,8 @@ window.onload = function() {
 
 			// NPC car can move left and right as well
 			var targetLaneXPos = game.width/2 - this.width/2 + (this.targetLane - 1) * 195;
-			if (this.lane !== this.targetLane && this.x > targetLaneXPos - 5 && this.x < targetLaneXPos + 5) {
+			if (this.lane !== this.targetLane && this.x > targetLaneXPos - 5 && 
+					this.x < targetLaneXPos + 5) {
 				this.lane = this.targetLane;
 			}
 			else if (this.targetLane < this.lane) { // car is moving to a different lane
@@ -362,7 +423,7 @@ window.onload = function() {
 				}
 			}
 			else {  // car is in the lane it wants to be
-				if (Math.floor(Math.random() * 10) === 0) {
+				if (Math.floor(Math.random() * 15) === 0) {
 					// car wants to move to a different lane
 					this.targetLane = Math.floor(Math.random() * 3);
 					console.log('changed target lane to:', this.targetLane);
@@ -428,7 +489,7 @@ window.onload = function() {
 		}
 	});
 
-	// Abstract Non-player-character Car class
+	// Side of the road scenery
 	var Scenery = Class.create(Sprite, {
 		initialize: function(imgPath) {
 			// Call superclass constructor
@@ -448,6 +509,33 @@ window.onload = function() {
 			this.x = Math.floor(Math.random() * 2) === 0 ? this.width / 2 : game.width - (this.width * 1.5);
 			this.y = -this.height;    
 			//console.log('set xpos to:', this.x);
+		},
+
+		update: function(evt) { 
+			var game = Game.instance;
+			var ySpeed = carSpeed;
+
+			this.y += ySpeed * evt.elapsed * 0.001;
+			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
+			if (this.y > game.height) {
+				this.parentNode.removeChild(this);        
+			}
+		}
+	});
+
+	// Middle of the road stripes
+	var Stripe = Class.create(Sprite, {
+		initialize: function(imgPath) {
+			// Call superclass constructor
+			Sprite.apply(this,[8, 40]);
+			this.image  = Game.instance.assets[imgPath];
+
+			this.animationDuration = 0;
+			this.rotationSpeed = 0;
+			var game = Game.instance;        
+			this.x = game.width / 2;
+			this.y = -this.height;    
+			this.addEventListener(Event.ENTER_FRAME, this.update);
 		},
 
 		update: function(evt) { 
@@ -482,7 +570,7 @@ window.onload = function() {
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
-			scoreLabel = new Label('SCORE<br/><br/>' + score);
+			scoreLabel = new Label('SCORE<br/>' + score);
 			scoreLabel.x = 9;
 			//scoreLabel.x = 20;
 			scoreLabel.y = 32;        
