@@ -39,7 +39,7 @@ window.onload = function() {
 	//game.preload('img/BG.png', 'img/penguinSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
-		'img/jeep60x83.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
+		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 
 	// 5 - Game settings
 	game.fps = 30;
@@ -231,12 +231,12 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of obstacles
 			this.generateSimpleCarTimer += evt.elapsed * 0.001;
-			timeBeforeNext = 7 + Math.floor(Math.random() * 6); // increase to make enemy cars more rare
+			timeBeforeNext = 8 + Math.floor(Math.random() * 6); // increase to make enemy cars more rare
 			if (this.generateSimpleCarTimer >= timeBeforeNext) { 
 				this.generateSimpleCarTimer -= timeBeforeNext;
 
 				var car = null;
-				var carChoice = Math.floor(Math.random() * 6);
+				var carChoice = Math.floor(Math.random() * 7);
 				switch (carChoice) {
 					case 0:
 					case 1:
@@ -249,19 +249,23 @@ window.onload = function() {
 					case 4:
 						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/yellowCarSheet.png', 76, 120, 8);
 						break;
-					default:
+					case 5:
 						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/greyCarSheet.png', 77, 120, 8);
+						break;
+					default:
+						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/jeepSheet.png', 76, 105, 9);
+
 				}
 				this.enemyGroup.addChild(car);
 			}
 			// Check collision
 			for (var i = this.enemyGroup.childNodes.length - 1; i >= 0; i--) {
-				var simpleCar = this.enemyGroup.childNodes[i];
+				var car = this.enemyGroup.childNodes[i];
 
-				if (simpleCar.intersect(this.car)){
+				if (car.intersect(this.car)){
 					var game = Game.instance;
 					//game.assets['snd/Hit.mp3'].play();
-					this.enemyGroup.removeChild(simpleCar);    
+					this.enemyGroup.removeChild(car);
 					// Game over
 				    //this.bgm.stop();
 					game.replaceScene(new SceneGameOver(this.score));        
@@ -271,7 +275,7 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of coins
 			this.generateCoinTimer += evt.elapsed * 0.001;
-			timeBeforeNext = 10 + Math.floor(Math.random() * 5); // increase to make coins more rare
+			timeBeforeNext = 9 + Math.floor(Math.random() * 5); // increase to make coins more rare
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
 				var xpos = leftBorder + 10 + Math.floor(Math.random() * (rightBorder - leftBorder - 10));
