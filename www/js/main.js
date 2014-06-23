@@ -29,7 +29,7 @@ var carSpeed = 300; // speed of still objects passing by
 window.onload = function() {
 	// 3 - Starting point
 	//var game = new Game(320, 440);
-	console.log('screenSize:', screenSize);
+	//console.log('screenSize:', screenSize);
 	//var screenWidth = 320;
 	//var screenHeight = 440;
 
@@ -190,7 +190,7 @@ window.onload = function() {
 				 xdir = 1;
 			}
 
-			console.log('evt.y:', evt.y, 'this.car.y:', this.car.y);
+			//console.log('evt.y:', evt.y, 'this.car.y:', this.car.y);
 			var ydir = 0;
 			if (evt.y < this.car.y - 5) {
 				ydir = -1;
@@ -259,8 +259,8 @@ window.onload = function() {
 			timeBeforeNext = 10 + Math.floor(Math.random() * 5); // increase to make coins more rare
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
-				var coin = Math.floor(Math.random() * 5) === 0 ? new Coin(Math.floor(Math.random()*3), 'pandacoin') : 
-					new Coin(Math.floor(Math.random()*3), 'dogecoin');
+				var xpos = leftBorder + 10 + Math.floor(Math.random() * (rightBorder - leftBorder - 10));
+				var coin = Math.floor(Math.random() * 5) === 0 ? new Coin(xpos, 'pandacoin') : new Coin(xpos, 'dogecoin');
 				this.coinGroup.addChild(coin);
 			}
 			// Check collision
@@ -328,7 +328,7 @@ window.onload = function() {
 			this.x = targetX;
 		},*/
 		move: function(xdir, ydir, increment) {
-			console.log('moving - xdir:', xdir, ', ydir:', ydir);
+			//console.log('moving - xdir:', xdir, ', ydir:', ydir);
 			//var targetX = 160 - this.width/2 + (lane-1)*90;
 			//var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
 			if (xdir < 0) { // left
@@ -343,13 +343,13 @@ window.onload = function() {
 			}
 
 			if (ydir < 0) { // up
-				console.log(this.y, '>= topBorder:', topBorder);
+				//console.log(this.y, '>= topBorder:', topBorder);
 				if (this.y >= topBorder) {
 					this.y -= increment;
 				}
 			}
 			else if (ydir > 0) { //down
-				console.log(this.y, '<= bottomBorder:', bottomBorder);
+				//console.log(this.y, '<= bottomBorder:', bottomBorder);
 				if (this.y <= bottomBorder) {
 					this.y += increment;
 				}
@@ -451,27 +451,28 @@ window.onload = function() {
 */
 	// Abstract Coin class
 	var Coin = Class.create(Sprite, {
-		initialize: function(lane, name) {
+		initialize: function(xpos, name) {
 			// Call superclass constructor
 			//Sprite.apply(this,[48, 49]);
 			this.name = name;
 			Sprite.apply(this,[64, 64]);
 			this.image  = Game.instance.assets['img/' + name + '64.png'];
 			this.rotationSpeed = 0;
-			this.setLane(lane);
+			this.setPosition(xpos);
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 		},
 
-		setLane: function(lane) {
+		setPosition: function(xpos) {
 			var game = Game.instance;        
 			//distance = 90; // multiply by 2.166 to get 195
 			var distance = 195;
 			
-			this.rotationSpeed = Math.random() * 100 - 50;
+			//this.rotationSpeed = Math.random() * 100 - 50;
 			
-			this.x = game.width/2 - this.width/2 + (lane - 1) * distance;
+			//this.x = game.width/2 - this.width/2 + (lane - 1) * distance;
+			this.x = xpos;
 			this.y = -this.height;    
-			this.rotation = Math.floor(Math.random() * 360);
+			//this.rotation = Math.floor(Math.random() * 360);
 		},
 
 		update: function(evt) { 
@@ -482,7 +483,7 @@ window.onload = function() {
 			//ySpeed = 150;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
-			this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
+			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
 			if (this.y > game.height) {
 				this.parentNode.removeChild(this);        
 			}
@@ -553,14 +554,13 @@ window.onload = function() {
 	// SceneGameOver  
 	var SceneGameOver = Class.create(Scene, {
 		initialize: function(score) {
-			var gameOverLabel, scoreLabel;
 			Scene.apply(this);
 			this.backgroundColor = 'black';
 			//	this.backgroundColor = '#000000'; // Hex Color Code version
 			//	this.backgroundColor = 'rgb(0,0,0)'; // RGB value version
 
 			// Game Over label
-			gameOverLabel = new Label("GAME OVER<br/><br/>Tap to Restart");
+			var gameOverLabel = new Label("GAME OVER<br/><br/>Tap to Restart");
 			gameOverLabel.x = 8;
 			//gameOverLabel.x = 18;
 			gameOverLabel.y = 128;
@@ -570,13 +570,13 @@ window.onload = function() {
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
-			scoreLabel = new Label('SCORE<br/>' + score);
+			var scoreLabel = new Label('SCORE<br/><br/>' + score);
 			scoreLabel.x = 9;
 			//scoreLabel.x = 20;
 			scoreLabel.y = 32;        
 			//scoreLabel.y = 70;        
 			scoreLabel.color = 'white';
-			scoreLabel.font = '16px strong';
+			scoreLabel.font = '32px strong';
 			scoreLabel.textAlign = 'center';
 
 			// Add labels
@@ -584,7 +584,8 @@ window.onload = function() {
 			this.addChild(scoreLabel);
 
 			// Listen for taps
-			this.addEventListener(Event.TOUCH_START, this.touchToRestart);
+			//this.addEventListener(Event.TOUCH_START, this.touchToRestart);
+			gameOverLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
 		},
 
 		touchToRestart: function(evt) {
