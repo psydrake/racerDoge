@@ -147,7 +147,7 @@ window.onload = function() {
 					//console.log('evt:', evt, ', this.car:', this.car);
 					if (this.car) {
 						var direction = evt.x < this.car.x ? 0 : 1;
-						this.car.move(direction, 10);
+						this.car.move(direction, 5);
 						this.keepSteering();
 					}
 				}, 500);
@@ -163,7 +163,7 @@ window.onload = function() {
 		handleTouchMove: function(evt) {
 			console.log('MOVE');
 			var direction = evt.x < this.car.x ? 0 : 1;
-			this.car.move(direction, 10);
+			this.car.move(direction, 5);
 			//this.handleTouchStart(evt);
 		},
 
