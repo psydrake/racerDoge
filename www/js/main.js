@@ -354,15 +354,16 @@ window.onload = function() {
 			this.image = Game.instance.assets['img/dogeCarSheet.png'];
 			// 2 - Animate
 			this.animationDuration = 0;
+			this.animationTimeIncrement = .35;
 			this.isSteering = false;
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
 		updateAnimation: function(evt) {
-			this.animationDuration += evt.elapsed * 0.001;       
-			if (this.animationDuration >= 0.25) {
+			this.animationDuration += evt.elapsed * 0.001;
+			if (this.animationDuration >= this.animationTimeIncrement) {
 				this.frame = (this.frame + 1) % 2;
-				this.animationDuration -= 0.25;
+				this.animationDuration -= this.animationTimeIncrement;
 			}
 		},
 		/*switchToLaneNumber: function(lane){     
@@ -412,6 +413,7 @@ window.onload = function() {
 			this.ySpeed = 95 + Math.floor(Math.random() * 10);
 
 			this.animationDuration = 0;
+			this.animationTimeIncrement = .35;
 			this.rotationSpeed = 0;
 			this.setLane(lane);
 			this.targetLane = lane; // car is moving to a different lane
@@ -478,9 +480,9 @@ window.onload = function() {
 
 		updateAnimation: function (evt) {        
 			this.animationDuration += evt.elapsed * 0.001;       
-			if (this.animationDuration >= 0.25) {
+			if (this.animationDuration >= this.animationTimeIncrement) {
 				this.frame = (this.frame + 1) % 2;
-				this.animationDuration -= 0.25;
+				this.animationDuration -= this.animationTimeIncrement;
 			}
 		}
 	});
@@ -619,7 +621,7 @@ window.onload = function() {
 			//gameOverLabel.x = 18;
 			gameOverLabel.y = 164;
 			//gameOverLabel.y = 278;
-			gameOverLabel.color = 'white';
+			gameOverLabel.color = 'green';
 			//gameOverLabel.font = '32px strong';
 			gameOverLabel.font = '32px Comic Sans MS';
 			gameOverLabel.textAlign = 'center';
@@ -630,7 +632,7 @@ window.onload = function() {
 			//scoreLabel.x = 20;
 			scoreLabel.y = 32;        
 			//scoreLabel.y = 70;        
-			scoreLabel.color = 'white';
+			scoreLabel.color = 'pink';
 			//scoreLabel.font = '32px strong';
 			scoreLabel.font = '32px Comic Sans MS';
 			scoreLabel.textAlign = 'center';
