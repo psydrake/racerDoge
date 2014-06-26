@@ -27,6 +27,7 @@ var carSpeed = 300; // speed of still objects passing by
 
 // 2 - On document load 
 window.onload = function() {
+	//trackPage('start');
 	// 3 - Starting point
 	//var game = new Game(320, 440);
 	//console.log('screenSize:', screenSize);
@@ -44,7 +45,7 @@ window.onload = function() {
 	// 5 - Game settings
 	game.fps = 30;
 	//game.scale = 1;
-	if (screenSize.width > 694 && screenSize.height > screenHeight) {
+	if (screenSize.width > screenWidth && screenSize.height > screenHeight) {
 		game.scale = 1;
 	}
 	else {
@@ -53,11 +54,16 @@ window.onload = function() {
 		var scale2 = screenSize.height / screenHeight;
 		game.scale = scale1 > scale2 ? scale2 : scale1;
 	}
+
+	console.log('before game.onload');
 	game.onload = function() {
+		console.log('in game.onload');
 		// Once Game finishes loading
-		var scene = new SceneGame();
+		var scene = new SceneGameOver(0);
+		//var scene = new SceneGame();
 		game.pushScene(scene);
 	}
+
 	// 7 - Start
 	game.start();   
 
@@ -65,6 +71,9 @@ window.onload = function() {
 	var SceneGame = Class.create(Scene, {
 		// The main gameplay scene.     
 		initialize: function() {
+			console.log('START');
+			trackPage('start');
+
 			var game, label, bg, car;
 			
 			// 1 - Call superclass constructor
@@ -132,7 +141,7 @@ window.onload = function() {
 
 		// user clicks on area of screen
 		handleTouchStart: function (evt) {
-			console.log('START');
+			//console.log('START');
 			//laneWidth = 320/3;
 			//var laneWidth = screenWidth/3;
 			//var laneWidth = screenWidth/2;
@@ -181,7 +190,7 @@ window.onload = function() {
 */
 		// user drags car
 		handleTouchMove: function(evt) {
-			console.log('MOVE');
+			//console.log('MOVE');
 			var xdir = 0;
 			if (evt.x < this.car.x - 5) {
 				xdir = -1;
@@ -587,22 +596,32 @@ window.onload = function() {
 		}
 	});
 
-	// SceneGameOver  
 	var SceneGameOver = Class.create(Scene, {
 		initialize: function(score) {
+			if (score === 0) {
+				console.log('OPEN');
+				trackPage('open');
+			}
+			else {
+				console.log('END');
+				trackPage('end');
+			}
+
 			Scene.apply(this);
 			this.backgroundColor = 'black';
 			//	this.backgroundColor = '#000000'; // Hex Color Code version
 			//	this.backgroundColor = 'rgb(0,0,0)'; // RGB value version
 
 			// Game Over label
-			var gameOverLabel = new Label("GAME OVER<br/><br/>Tap to Restart");
+			var gameOverString = score === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
+			var gameOverLabel = new Label(gameOverString);
 			gameOverLabel.x = 8;
 			//gameOverLabel.x = 18;
 			gameOverLabel.y = 164;
 			//gameOverLabel.y = 278;
 			gameOverLabel.color = 'white';
-			gameOverLabel.font = '32px strong';
+			//gameOverLabel.font = '32px strong';
+			gameOverLabel.font = '32px Comic Sans MS';
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
@@ -612,7 +631,8 @@ window.onload = function() {
 			scoreLabel.y = 32;        
 			//scoreLabel.y = 70;        
 			scoreLabel.color = 'white';
-			scoreLabel.font = '32px strong';
+			//scoreLabel.font = '32px strong';
+			scoreLabel.font = '32px Comic Sans MS';
 			scoreLabel.textAlign = 'center';
 
 			// Add labels
