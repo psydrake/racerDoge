@@ -1,15 +1,6 @@
 // 1 - Start enchant.js
 enchant(); 
-/*
-var bgm = new Media("/android_asset/bgm.mp3",
-    function() {
-        alert("playAudio():Audio Success");
-    },
-    function(err) {
-        alert(err);
-    }
-);
-*/
+
 // first get the size from the window
 // if that didn't work, get it from the body
 var screenSize = {
@@ -27,12 +18,7 @@ var carSpeed = 300; // speed of still objects passing by
 
 // 2 - On document load 
 window.onload = function() {
-	//trackPage('start');
 	// 3 - Starting point
-	//var game = new Game(320, 440);
-	//console.log('screenSize:', screenSize);
-	//var screenWidth = 320;
-	//var screenHeight = 440;
 	doCustomActions(); // run from custom.js
 
 	var game = new Game(screenWidth, screenHeight);
@@ -48,7 +34,6 @@ window.onload = function() {
 
 	// 5 - Game settings
 	game.fps = 30;
-	//game.scale = 1;
 	if (screenSize.width > screenWidth && screenSize.height > screenHeight) {
 		game.scale = 1;
 	}
@@ -71,7 +56,6 @@ window.onload = function() {
 	// 7 - Start
 	game.start();   
 
-	// SceneGame  
 	var SceneGame = Class.create(Scene, {
 		// The main gameplay scene.     
 		initialize: function() {
@@ -100,7 +84,7 @@ window.onload = function() {
 			bg.image = game.assets['img/gameBg.png'];
 
 			// Car
-			car = new Car();
+			car = new DogeCar();
 			car.x = game.width/2 - car.width/2;
 			//car.y = 280;
 			car.y = topBorder;
@@ -145,53 +129,9 @@ window.onload = function() {
 
 		// user clicks on area of screen
 		handleTouchStart: function (evt) {
-			//console.log('START');
-			//laneWidth = 320/3;
-			//var laneWidth = screenWidth/3;
-			//var laneWidth = screenWidth/2;
-			//var direction = Math.floor(evt.x / laneWidth);
-			//direction = Math.max(Math.min(2,direction),0);
-
-			//this.car.isSteering = true;
-			//this.keepSteering(evt);
 			this.handleTouchMove(evt);
 		},
-/*
-		keepSteering: function(evt) {
-			//var direction = evt.x < this.car.x ? 0 : 1;
-			//this.car.move(direction, 10);
-			if (this.car.isSteering) {
-				window.setTimeout(function() {
-					//console.log('evt:', evt, ', this.car:', this.car);
-					if (this.car) {
-						var xdir = 0;
-						if (evt.x < this.car.x - 5) {
-							xdir = -1;
-						}
-						else if (evt.x > this.car.x + 5) {
-							 xdir = 1;
-						}
 
-						var ydir = 0;
-						if (evt.y < this.car.y - 5) {
-							ydir = -1;
-						}
-						else if (evt.y > this.car.y + 5) {
-							ydir = 1;
-						}
-
-						this.car.move(xdir, 5); //ydir, 5);
-						this.keepSteering();
-					}
-				}, 500);
-			}
-		},
-
-		handleTouchStop: function(evt) {
-			console.log('STOP');
-			this.car.isSteering = false;
-		},
-*/
 		// user drags car
 		handleTouchMove: function(evt) {
 			//console.log('MOVE');
@@ -214,9 +154,6 @@ window.onload = function() {
 
 			//var direction = evt.x < this.car.x ? 0 : 1;
 			this.car.move(xdir, ydir, 2);
-			//this.car.isSteering = true;
-			//this.keepSteering(evt);
-			//this.handleTouchStart(evt);
 		},
 
 		setScore: function (value) {
@@ -368,19 +305,14 @@ window.onload = function() {
 		}
 	});
 
-	// Car
-	var Car = Class.create(Sprite, {
-		// The player character.     
-		initialize: function() {
-			// 1 - Call superclass constructor
-			//Sprite.apply(this,[30, 43]);
-			//Sprite.apply(this,[63, 80]);
-			Sprite.apply(this,[65, 82]);
-			this.image = Game.instance.assets['img/dogeCarSheet.png'];
-			// 2 - Animate
+	// Generic vehicle superclass
+	var Vehicle = Class.create(Sprite, {
+		initialize: function(width, height, imagePath) {
+			Sprite.apply(this, [width, height]);
+			this.image = Game.instance.assets[imagePath];
+
 			this.animationDuration = 0;
-			this.animationTimeIncrement = .35;
-			this.isSteering = false;
+			this.animationTimeIncrement = .50;
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
@@ -390,7 +322,16 @@ window.onload = function() {
 				this.frame = (this.frame + 1) % 2;
 				this.animationDuration -= this.animationTimeIncrement;
 			}
+		}
+	});
+
+	var DogeCar = Class.create(Vehicle, {
+		// The player character.     
+		initialize: function() {
+			// 1 - Call superclass constructor
+			Vehicle.call(this, 65, 82, 'img/dogeCarSheet.png'); 
 		},
+
 		/*switchToLaneNumber: function(lane){     
 			//var targetX = 160 - this.width/2 + (lane-1)*90;
 			var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
@@ -427,18 +368,14 @@ window.onload = function() {
 	});
 
 	// Abstract Non-player-character Car class
-	var NPCVehicle = Class.create(Sprite, {
+	var NPCVehicle = Class.create(Vehicle, {
 		initialize: function(lane, imgPath, width, height, crazyConstant) {
-			console.log('LANE:', lane);
 			// Call superclass constructor
-			//Sprite.apply(this,[60, 126]);
-			Sprite.apply(this,[width, height]);
-			this.image = Game.instance.assets[imgPath];	
+			Vehicle.call(this, width, height, imgPath); 
+
 			this.crazyConstant = crazyConstant; // how crazy is the driver? number between 1-10 
 			this.ySpeed = 95 + Math.floor(Math.random() * 10);
 
-			this.animationDuration = 0;
-			this.animationTimeIncrement = .35;
 			this.rotationSpeed = 0;
 			this.setLane(lane);
 			this.targetLane = lane; // car is moving to a different lane
@@ -502,14 +439,6 @@ window.onload = function() {
 				}
 			}
 		},
-
-		updateAnimation: function (evt) {        
-			this.animationDuration += evt.elapsed * 0.001;       
-			if (this.animationDuration >= this.animationTimeIncrement) {
-				this.frame = (this.frame + 1) % 2;
-				this.animationDuration -= this.animationTimeIncrement;
-			}
-		}
 	});
 /*
 	Var BlueCar = Class.create(NPCVehicle, {
