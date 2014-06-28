@@ -42,6 +42,10 @@ window.onload = function() {
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 
+	if (!usingDevice) { // only load sounds for browser game - phonegap freezes up otherwise
+		game.preload('snd/Hit.mp3', 'snd/bgm.mp3');
+	}
+
 	// 5 - Game settings
 	game.fps = 30;
 	//game.scale = 1;
@@ -273,7 +277,14 @@ window.onload = function() {
 
 				if (car.intersect(this.car)){
 					var game = Game.instance;
-					//game.assets['snd/Hit.mp3'].play();
+					if (usingDevice) {
+						if (typeof snd['hit'] !== 'undefined') {
+							snd['hit'].play();
+						}
+					}
+					else {
+						game.assets['snd/Hit.mp3'].play();
+					}
 					this.enemyGroup.removeChild(car);
 					// Game over
 				    //this.bgm.stop();
@@ -295,9 +306,16 @@ window.onload = function() {
 			for (var i = this.coinGroup.childNodes.length - 1; i >= 0; i--) {
 				var coin = this.coinGroup.childNodes[i];
 
-				if (coin.intersect(this.car)){
+				if (coin.intersect(this.car)) {
 					var game = Game.instance;
-					//game.assets['snd/Hit.mp3'].play();
+					if (usingDevice) {
+						if (typeof snd['hit'] !== 'undefined') {
+							snd['hit'].play();
+						}
+					}
+					else {
+						game.assets['snd/Hit.mp3'].play();
+					}
 					this.coinGroup.removeChild(coin);    
 					this.score += coin.name === 'dogecoin' ? 5 : 10;
 				}
@@ -306,7 +324,14 @@ window.onload = function() {
 					var enemy = this.enemyGroup.childNodes[j];
 					if (coin.intersect(enemy)) {
 						var game = Game.instance;
-						//game.assets['snd/Hit.mp3'].play();
+						if (usingDevice) {
+							if (typeof snd['hit'] !== 'undefined') {
+						        snd['hit'].play();
+							}
+						}
+						else {
+							game.assets['snd/Hit.mp3'].play();
+						}
 						this.coinGroup.removeChild(coin);    
 					}
 				}

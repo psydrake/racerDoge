@@ -13,3 +13,5 @@ function doCustomActions() {
 	// NOOP
 }
 
+var usingDevice = false; // game is played on some kind of web browser
+var snd = {};

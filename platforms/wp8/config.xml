@@ -12,4 +12,10 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <feature name="File">
+        <param name="wp-package" value="File" />
+    </feature>
+    <feature name="Media">
+        <param name="wp-package" value="Media" />
+    </feature>
 </widget>

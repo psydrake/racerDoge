@@ -11,6 +11,32 @@
                         {
                             "xml": "<feature name=\"InAppBrowser\"><param name=\"wp-package\" value=\"InAppBrowser\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"File\"><param name=\"wp-package\" value=\"File\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Media\"><param name=\"wp-package\" value=\"Media\" /></feature>",
+                            "count": 1
+                        }
+                    ]
+                }
+            },
+            "Properties/WMAppManifest.xml": {
+                "parents": {
+                    "/Deployment/App/Capabilities": [
+                        {
+                            "xml": "<Capability Name=\"ID_CAP_MEDIALIB_AUDIO\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<Capability Name=\"ID_CAP_MEDIALIB_PLAYBACK\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<Capability Name=\"ID_CAP_MICROPHONE\" />",
+                            "count": 1
                         }
                     ]
                 }
@@ -23,7 +49,14 @@
         },
         "org.apache.cordova.inappbrowser": {
             "PACKAGE_NAME": "{7FE6AE4D-3D66-4DAF-ADFA-84809BD626F2}"
+        },
+        "org.apache.cordova.media": {
+            "PACKAGE_NAME": "{a1b3f826-05f8-42da-8faf-cafb87e031b5}"
         }
     },
-    "dependent_plugins": {}
+    "dependent_plugins": {
+        "org.apache.cordova.file": {
+            "PACKAGE_NAME": "{a1b3f826-05f8-42da-8faf-cafb87e031b5}"
+        }
+    }
 }
