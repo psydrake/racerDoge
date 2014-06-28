@@ -20,7 +20,9 @@ function doCustomActions() {
 	if (typeof analytics !== "undefined") {
 		analytics.startTrackerWithId('UA-52101670-2');
 	}
-	snd['hit'] = new Media(getPathMedia() + 'snd/Hit.mp3');
+	if (typeof snd !== 'undefined') {
+		snd['hit'] = new Media(getPathMedia() + 'snd/Hit.mp3');
+	}
 }
 
 var usingDevice = true; // using android device

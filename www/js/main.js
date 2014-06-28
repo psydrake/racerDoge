@@ -56,7 +56,7 @@ window.onload = function() {
 		//game.scale = .462
 		var scale1 = screenSize.width / screenWidth;
 		var scale2 = screenSize.height / screenHeight;
-		game.scale = scale1 > scale2 ? scale2 : scale1;
+		game.scale = (scale1 > scale2 ? scale2 : scale1) * .99;
 	}
 
 	console.log('before game.onload');
