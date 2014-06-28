@@ -9,22 +9,18 @@ function trackPage(page) {
 	}
 }
 
-function doCustomActions() {
-	if (typeof analytics !== "undefined") {
-		analytics.startTrackerWithId('UA-52101670-2');
-	}
-	//sndHit = new Media("snd/Hit.mp3");
-	//alert(sndHit);
-}
-
-var getPathMedia = function () {
+function getPathMedia() {
     var path = window.location.pathname;
     var phoneGapPath = path.substring(0, path.lastIndexOf('/') + 1);
 	return phoneGapPath;
 };
 
-//alert(getPathMedia() + 'snd/Hit.mp3');
-//sndHit = new Media(getPathMedia() + 'snd/Hit.mp3');
-var usingDevice = true;
-var snd = {hit: new Media('snd/Hit.mp3')};
+var snd = {}; // each custom.js must define this
+function doCustomActions() {
+	if (typeof analytics !== "undefined") {
+		analytics.startTrackerWithId('UA-52101670-2');
+	}
+	snd['hit'] = new Media(getPathMedia() + 'snd/Hit.mp3');
+}
 
+var usingDevice = true; // using android device

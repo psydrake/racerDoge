@@ -33,11 +33,11 @@ window.onload = function() {
 	//console.log('screenSize:', screenSize);
 	//var screenWidth = 320;
 	//var screenHeight = 440;
+	doCustomActions(); // run from custom.js
 
 	var game = new Game(screenWidth, screenHeight);
 
 	// 4 - Preload resources
-	//game.preload('img/BG.png', 'img/penguinSheet.png', 'img/Ice.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
