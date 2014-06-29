@@ -171,12 +171,10 @@ window.onload = function() {
 
 			// Check if it's time to create a new lane stripe
 			this.generateStripeTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = .5; // increase to make enemy cars more rare
+			var  timeBeforeNext = .7; // increase to make enemy cars more rare
 			if (this.generateStripeTimer >= timeBeforeNext) { 
 				this.generateStripeTimer -= timeBeforeNext;
-
-				var stripe = new Stripe('img/whiteLaneStripe8x40.png');
-				this.stripeGroup.addChild(stripe);
+				this.stripeGroup.addChild(new Stripe());
 			}
 
 			// Check if it's time to create a new set of obstacles
@@ -455,7 +453,7 @@ window.onload = function() {
 		}
 	});
 
-	// Abstract Coin class
+	// Coins - e.g. Doge, PND
 	var Coin = Class.create(StationaryObject, {
 		initialize: function(xpos, name) {
 			this.name = name;
@@ -470,36 +468,16 @@ window.onload = function() {
 	var Scenery = Class.create(StationaryObject, {
 		initialize: function(imgPath) {
 			// Call superclass constructor
-			var game = Game.instance;
-			//var ypos = -this.height;    
 			StationaryObject.call(this, 64, 64, imgPath, null, null); 
 		}
 	});
 
 	// Middle of the road stripes
-	var Stripe = Class.create(Sprite, {
-		initialize: function(imgPath) {
+	var Stripe = Class.create(StationaryObject, {
+		initialize: function() {			
+			xpos = Game.instance.width / 2;
 			// Call superclass constructor
-			Sprite.apply(this,[8, 40]);
-			this.image  = Game.instance.assets[imgPath];
-
-			this.animationDuration = 0;
-			this.rotationSpeed = 0;
-			var game = Game.instance;        
-			this.x = game.width / 2;
-			this.y = -this.height;    
-			this.addEventListener(Event.ENTER_FRAME, this.update);
-		},
-
-		update: function(evt) { 
-			var game = Game.instance;
-			var ySpeed = carSpeed;
-
-			this.y += ySpeed * evt.elapsed * 0.001;
-			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
-			if (this.y > game.height) {
-				this.parentNode.removeChild(this);        
-			}
+			StationaryObject.call(this, 8, 40, 'img/whiteLaneStripe8x40.png', xpos, null); 
 		}
 	});
 
