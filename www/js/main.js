@@ -27,7 +27,8 @@ window.onload = function() {
 	// 4 - Preload resources
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
-		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png'); //, 'snd/Hit.mp3', 'snd/bgm.mp3');
+		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png',
+		'img/bomb40.gif'); 
 
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
@@ -53,8 +54,8 @@ window.onload = function() {
 			if (typeof snd !== 'undefined') { // we are playing game in a browser - use enchant.js sound system
 				snd['coin'] = game.assets['snd/170147__timgormly__8-bit-coin.mp3']; // player picks up coin
 				snd['bump'] = game.assets['snd/170141__timgormly__8-bit-bump.mp3']; // player gets hit by enemy car
-				snd['bumper'] = game.assets['snd/170140__timgormly__8-bit-bumper.mp3']; // player gets hit by bomb
-				snd['explosion'] = game.assets['snd/170144__timgormly__8-bit-explosion2.mp3']; // player shot hits enemy
+				snd['bumper'] = game.assets['snd/170140__timgormly__8-bit-bumper.mp3']; // jeep drops bomb
+				snd['explosion'] = game.assets['snd/170144__timgormly__8-bit-explosion2.mp3']; // player shot hits enemy, or player hits bomb
 				snd['powerup'] = game.assets['snd/170169__timgormly__8-bit-powerup.mp3']; 
 				snd['pickup'] = game.assets['snd/170170__timgormly__8-bit-pickup.mp3']; // player leaves enemy car in the dust
 			}
@@ -100,13 +101,15 @@ window.onload = function() {
 
 			// object groups
 			this.stripeGroup = new Group();
+			this.bombGroup = new Group();
+			this.sceneryGroup = new Group();
 			this.enemyGroup = new Group();
 			this.coinGroup = new Group();
-			this.sceneryGroup = new Group();
 
 			// 4 - Add child nodes        
 			this.addChild(bg);
 			this.addChild(this.stripeGroup);
+			this.addChild(this.bombGroup);
 			this.addChild(this.sceneryGroup);
 			this.addChild(this.coinGroup);
 			this.addChild(this.enemyGroup);
@@ -125,7 +128,8 @@ window.onload = function() {
 			this.generateStripeTimer = 0;
 			this.generateSceneryTimer = 0;
 			this.generateCoinTimer = 0;
-			this.generateSimpleCarTimer = 0;
+			this.generateEnemyTimer = 0;
+			this.generateBombTimer = 0;
 			this.scoreTimer = 0;
 			gameScore = 0;
 
@@ -188,35 +192,36 @@ window.onload = function() {
 			}
 
 			// Check if it's time to create a new set of obstacles
-			this.generateSimpleCarTimer += evt.elapsed * 0.001;
+			this.generateEnemyTimer += evt.elapsed * 0.001;
 			timeBeforeNext = 8 + Math.floor(Math.random() * 6); // increase to make enemy cars more rare
-			if (this.generateSimpleCarTimer >= timeBeforeNext) { 
-				this.generateSimpleCarTimer -= timeBeforeNext;
+			if (this.generateEnemyTimer >= timeBeforeNext) { 
+				this.generateEnemyTimer -= timeBeforeNext;
 
 				var car = null;
 				var carChoice = Math.floor(Math.random() * 7);
 				switch (carChoice) {
 					case 0:
 					case 1:
-						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/greenCarSheet.png', 60, 126, 6);
+						car = new NPCVehicle('green car', Math.floor(Math.random()*3), 'img/greenCarSheet.png', 60, 126, 6);
 						break;
 					case 2:
 					case 3:
-						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/blueCarSheet.png', 60, 126, 6);
+						car = new NPCVehicle('blue car', Math.floor(Math.random()*3), 'img/blueCarSheet.png', 60, 126, 6);
 						break;
 					case 4:
-						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/yellowCarSheet.png', 76, 120, 8);
+						car = new NPCVehicle('yellow car', Math.floor(Math.random()*3), 'img/yellowCarSheet.png', 76, 120, 8);
 						break;
 					case 5:
-						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/greyCarSheet.png', 77, 120, 8);
+						car = new NPCVehicle('grey car', Math.floor(Math.random()*3), 'img/greyCarSheet.png', 77, 120, 8);
 						break;
 					default:
-						car = new NPCVehicle(Math.floor(Math.random()*3), 'img/jeepSheet.png', 76, 105, 9);
+						car = new NPCVehicle('jeep', Math.floor(Math.random()*3), 'img/jeepSheet.png', 76, 105, 9);
 
 				}
 				this.enemyGroup.addChild(car);
 			}
-			// Check collision
+
+			// Check enemy car collision
 			for (var i = this.enemyGroup.childNodes.length - 1; i >= 0; i--) {
 				var car = this.enemyGroup.childNodes[i];
 
@@ -225,6 +230,36 @@ window.onload = function() {
 						snd['bump'].play();
 					}
 					this.enemyGroup.removeChild(car);
+					// Game over
+				    //this.bgm.stop();
+					Game.instance.replaceScene(new SceneGameOver(gameScore));
+				    break;
+				}
+
+				// Check if it's time to create a new bomb
+				if (car.name === 'jeep') { // jeeps can drop bombs
+					this.generateBombTimer += evt.elapsed * 0.001;
+					timeBeforeNext = 3 + Math.floor(Math.random() * 3); // increase to make bombs more rare
+					if (this.generateBombTimer >= timeBeforeNext) { 
+						this.generateBombTimer -= timeBeforeNext;
+						var bomb = new Bomb(car.x, car.y + 25);
+						this.bombGroup.addChild(bomb);
+						if (typeof snd['bumper'] !== 'undefined') {
+							snd['bumper'].play();
+						}
+					}
+				}
+			}
+
+			// Check bomb collision
+			for (var i = this.bombGroup.childNodes.length - 1; i >= 0; i--) {
+				var bomb = this.bombGroup.childNodes[i];
+
+				if (bomb.intersect(this.car)) { // player car gets hit by bomb!
+					if (typeof snd['explosion'] !== 'undefined') {
+						snd['explosion'].play();
+					}
+					this.enemyGroup.removeChild(bomb);
 					// Game over
 				    //this.bgm.stop();
 					Game.instance.replaceScene(new SceneGameOver(gameScore));
@@ -346,10 +381,11 @@ window.onload = function() {
 
 	// Abstract Non-player-character Car class
 	var NPCVehicle = Class.create(Vehicle, {
-		initialize: function(lane, imgPath, width, height, crazyConstant) {
+		initialize: function(name, lane, imgPath, width, height, crazyConstant) {
 			// Call superclass constructor
 			Vehicle.call(this, width, height, imgPath); 
 
+			this.name = name;
 			this.crazyConstant = crazyConstant; // how crazy is the driver? number between 1-10 
 			this.ySpeed = 95 + Math.floor(Math.random() * 10);
 
@@ -364,12 +400,9 @@ window.onload = function() {
 			var	game = Game.instance;        
 			//distance = 90; // multiply by 2.166 to get 195
 			var distance = 195;
-			//this.rotationSpeed = Math.random() * 100 - 50;
-			//this.rotationSpeed = 0;
 			
 			this.x = game.width/2 - this.width/2 + (lane - 1) * distance;
 			this.y = -this.height;    
-			//this.rotation = Math.floor(Math.random() * 360);
 			this.lane = lane;
 		},
 
@@ -454,6 +487,15 @@ window.onload = function() {
 			//var ypos = -this.height;    
 			// Call superclass constructor
 			StationaryObject.call(this, 64, 64, imgPath, xpos, null); 
+		}
+	});
+
+	// Coins - e.g. Doge, PND
+	var Bomb = Class.create(StationaryObject, {
+		initialize: function(xpos, ypos) {
+			var imgPath = 'img/bomb40.gif';
+			// Call superclass constructor
+			StationaryObject.call(this, 40, 40, imgPath, xpos, ypos); 
 		}
 	});
 
