@@ -332,15 +332,7 @@ window.onload = function() {
 			Vehicle.call(this, 65, 82, 'img/dogeCarSheet.png'); 
 		},
 
-		/*switchToLaneNumber: function(lane){     
-			//var targetX = 160 - this.width/2 + (lane-1)*90;
-			var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
-			this.x = targetX;
-		},*/
 		move: function(xdir, ydir, increment) {
-			//console.log('moving - xdir:', xdir, ', ydir:', ydir);
-			//var targetX = 160 - this.width/2 + (lane-1)*90;
-			//var targetX = (game.width/2) - this.width/2 + (lane-1)*195;
 			if (xdir < 0) { // left
 				if (this.x >= leftBorder) {
 					this.x -= increment;
@@ -353,13 +345,11 @@ window.onload = function() {
 			}
 
 			if (ydir < 0) { // up
-				//console.log(this.y, '>= topBorder:', topBorder);
 				if (this.y >= topBorder) {
 					this.y -= increment;
 				}
 			}
 			else if (ydir > 0) { //down
-				//console.log(this.y, '<= bottomBorder:', bottomBorder);
 				if (this.y <= bottomBorder) {
 					this.y += increment;
 				}
@@ -440,48 +430,22 @@ window.onload = function() {
 			}
 		},
 	});
-/*
-	Var BlueCar = Class.create(NPCVehicle, {
-		initialize: function(lane, 'img/blueCarSheet.png') {
+
+	// Abstract class for non-moving objects - scenery, coins, landmines
+	var StationaryObject = Class.create(Sprite, {
+		initialize: function(width, height, imgPath, xpos, ypos) {
 			// Call superclass constructor
-			//Sprite.apply(this,[48, 49]);
-			Sprite.apply(this,[60, 126]);
-			this.image  = Game.instance.assets['img/blueCarSheet.png'];
-		},
-	});
-*/
-	// Abstract Coin class
-	var Coin = Class.create(Sprite, {
-		initialize: function(xpos, name) {
-			// Call superclass constructor
-			//Sprite.apply(this,[48, 49]);
-			this.name = name;
-			Sprite.apply(this,[64, 64]);
-			this.image  = Game.instance.assets['img/' + name + '64.png'];
+			Sprite.apply(this, [width, height]);
+			this.image  = Game.instance.assets[imgPath];
 			this.rotationSpeed = 0;
-			this.setPosition(xpos);
+			this.x = xpos ? xpos : Math.floor(Math.random() * 2) === 0 ? this.width / 2 : game.width - (this.width * 1.5);
+			this.y = ypos ? ypos : -this.height;
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 		},
 
-		setPosition: function(xpos) {
-			var game = Game.instance;        
-			//distance = 90; // multiply by 2.166 to get 195
-			var distance = 195;
-			
-			//this.rotationSpeed = Math.random() * 100 - 50;
-			
-			//this.x = game.width/2 - this.width/2 + (lane - 1) * distance;
-			this.x = xpos;
-			this.y = -this.height;    
-			//this.rotation = Math.floor(Math.random() * 360);
-		},
-
 		update: function(evt) { 
-			var ySpeed, game;
-			
-			game = Game.instance;
-			ySpeed = carSpeed;
-			//ySpeed = 150;
+			var game = Game.instance;
+			var ySpeed = carSpeed;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
 			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
@@ -491,37 +455,24 @@ window.onload = function() {
 		}
 	});
 
+	// Abstract Coin class
+	var Coin = Class.create(StationaryObject, {
+		initialize: function(xpos, name) {
+			this.name = name;
+			var imgPath = 'img/' + name + '64.png';
+			//var ypos = -this.height;    
+			// Call superclass constructor
+			StationaryObject.call(this, 64, 64, imgPath, xpos, null); 
+		}
+	});
+
 	// Side of the road scenery
-	var Scenery = Class.create(Sprite, {
+	var Scenery = Class.create(StationaryObject, {
 		initialize: function(imgPath) {
 			// Call superclass constructor
-			Sprite.apply(this,[64, 64]);
-			this.image  = Game.instance.assets[imgPath];
-
-			this.animationDuration = 0;
-			this.rotationSpeed = 0;
-			this.setXPos();
-			this.addEventListener(Event.ENTER_FRAME, this.update);
-		},
-
-		setXPos: function() {
-			var game = Game.instance;        
-			//var distance = 195;
-			//this.x = game.width/2 - this.width/2 + (Math.floor(Math.random() * 3) - 1) * distance;
-			this.x = Math.floor(Math.random() * 2) === 0 ? this.width / 2 : game.width - (this.width * 1.5);
-			this.y = -this.height;    
-			//console.log('set xpos to:', this.x);
-		},
-
-		update: function(evt) { 
 			var game = Game.instance;
-			var ySpeed = carSpeed;
-
-			this.y += ySpeed * evt.elapsed * 0.001;
-			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
-			if (this.y > game.height) {
-				this.parentNode.removeChild(this);        
-			}
+			//var ypos = -this.height;    
+			StationaryObject.call(this, 64, 64, imgPath, null, null); 
 		}
 	});
 
