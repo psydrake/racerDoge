@@ -87,7 +87,7 @@ window.onload = function() {
 			car = new DogeCar();
 			car.x = game.width/2 - car.width/2;
 			//car.y = 280;
-			car.y = topBorder;
+			car.y = topBorder + 100;
 			this.car = car;
 
 			// object groups
@@ -500,21 +500,20 @@ window.onload = function() {
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
 			var gameOverLabel = new Label(gameOverString);
-			gameOverLabel.x = 8;
-			//gameOverLabel.x = 18;
-			gameOverLabel.y = 164;
-			//gameOverLabel.y = 278;
+			//gameOverLabel.x = 8;
+			gameOverLabel.x = game.width / 3;
+			//gameOverLabel.y = 164;
+			gameOverLabel.y = game.height / 2;
 			gameOverLabel.color = 'green';
-			//gameOverLabel.font = '32px strong';
 			gameOverLabel.font = '32px Comic Sans MS';
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
 			var scoreLabel = new Label('SCORE<br/><br/>' + score);
-			scoreLabel.x = 9;
-			//scoreLabel.x = 20;
-			scoreLabel.y = 32;        
-			//scoreLabel.y = 70;        
+			//scoreLabel.x = 9;
+			scoreLabel.x = game.width / 3;
+			//scoreLabel.y = 32;
+			scoreLabel.y = game.height / 3;
 			scoreLabel.color = 'pink';
 			//scoreLabel.font = '32px strong';
 			scoreLabel.font = '32px Comic Sans MS';
