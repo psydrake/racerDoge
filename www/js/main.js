@@ -28,12 +28,13 @@ window.onload = function() {
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png',
-		'img/bomb40.gif'); 
+		'img/bomb40.gif', 'img/laser11x39.png'); 
 
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
 				'snd/170140__timgormly__8-bit-bumper.mp3', 'snd/170144__timgormly__8-bit-explosion2.mp3', 
-				'snd/170169__timgormly__8-bit-powerup.mp3', 'snd/170170__timgormly__8-bit-pickup.mp3', 'snd/bgm.mp3');
+				'snd/170169__timgormly__8-bit-powerup.mp3', 'snd/170170__timgormly__8-bit-pickup.mp3', 
+				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/bgm.mp3');
 	}
 
 	// 5 - Game settings
@@ -58,6 +59,7 @@ window.onload = function() {
 				snd['explosion'] = game.assets['snd/170144__timgormly__8-bit-explosion2.mp3']; // player shot hits enemy, or player hits bomb
 				snd['powerup'] = game.assets['snd/170169__timgormly__8-bit-powerup.mp3']; 
 				snd['pickup'] = game.assets['snd/170170__timgormly__8-bit-pickup.mp3']; // player leaves enemy car in the dust
+				snd['laser'] = game.assets['snd/170161__timgormly__8-bit-laser.mp3']; // player shoots laser
 			}
 		}
 
@@ -79,7 +81,7 @@ window.onload = function() {
 			var game = Game.instance;
 			// 3 - Create child nodes
 			// Label
-			var label = new Label('SCORE<br/>0');
+			var label = new Label('SCORE<br/><br/>0');
 			label.x = 9;
 			label.y = 32;        
 			label.color = 'white';
@@ -103,8 +105,9 @@ window.onload = function() {
 			this.stripeGroup = new Group();
 			this.bombGroup = new Group();
 			this.sceneryGroup = new Group();
-			this.enemyGroup = new Group();
 			this.coinGroup = new Group();
+			this.laserGroup = new Group();
+			this.enemyGroup = new Group();
 
 			// 4 - Add child nodes        
 			this.addChild(bg);
@@ -112,6 +115,7 @@ window.onload = function() {
 			this.addChild(this.bombGroup);
 			this.addChild(this.sceneryGroup);
 			this.addChild(this.coinGroup);
+			this.addChild(this.laserGroup);
 			this.addChild(this.enemyGroup);
 			this.addChild(car);
 			this.addChild(label);
@@ -236,13 +240,25 @@ window.onload = function() {
 				    break;
 				}
 
+				for (var j = 0; j < this.laserGroup.childNodes.length; j++) {
+					var laser = this.laserGroup.childNodes[j];
+					if (car.intersect(laser)) {
+						if (typeof snd['explosion'] !== 'undefined') {
+							snd['explosion'].play();
+						}
+						this.laserGroup.removeChild(laser);
+						this.enemyGroup.removeChild(car);
+						this.setScore(gameScore += 50);
+					}
+				}
+
 				// Check if it's time to create a new bomb
 				if (car.name === 'jeep') { // jeeps can drop bombs
 					this.generateBombTimer += evt.elapsed * 0.001;
 					timeBeforeNext = 3 + Math.floor(Math.random() * 3); // increase to make bombs more rare
 					if (this.generateBombTimer >= timeBeforeNext) { 
 						this.generateBombTimer -= timeBeforeNext;
-						var bomb = new Bomb(car.x, car.y + 25);
+						var bomb = new Bomb(car.x, car.y + 30);
 						this.bombGroup.addChild(bomb);
 						if (typeof snd['bumper'] !== 'undefined') {
 							snd['bumper'].play();
@@ -286,6 +302,10 @@ window.onload = function() {
 					}
 					this.coinGroup.removeChild(coin);    
 					this.setScore(gameScore += coin.name === 'dogecoin' ? 5 : 10);
+					//if (coin.name === 'pandacoin') { // PND gives you lasers!
+					this.car.laserTimer = 0;
+					this.car.laserShotsTaken = 0; // reset shots taken
+					//}
 				}
 				// Enemy cars can pick up coins too
 				for (var j = this.enemyGroup.childNodes.length - 1; j >= 0; j--) {
@@ -335,6 +355,10 @@ window.onload = function() {
 
 			this.animationDuration = 0;
 			this.animationTimeIncrement = .50;
+			this.laserTimeIncrement = 1; // how many seconds between shots
+			this.laserTimer = this.laserTimeIncrement + .001; // set to 0 to activate lasers
+			this.maxLaserShots = 8; // how many shots you get per powerup
+			this.laserShotsTaken = 0; // how many shots have you taken this powerup?
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
@@ -343,6 +367,21 @@ window.onload = function() {
 			if (this.animationDuration >= this.animationTimeIncrement) {
 				this.frame = (this.frame + 1) % 2;
 				this.animationDuration -= this.animationTimeIncrement;
+			}
+
+			if (this.laserTimer < this.laserTimeIncrement && this.laserShotsTaken <= this.maxLaserShots) { // lasers are activated
+				this.laserTimer += evt.elapsed * 0.001;
+				if (this.laserTimer >= this.laserTimeIncrement) { // laser time!
+					var laser = new Laser(this.x, this.y - 30);
+					this.parentNode.laserGroup.addChild(laser);
+					if (typeof snd['laser'] !== 'undefined') {
+						snd['laser'].play();
+					}
+					this.laserShotsTaken += 1;
+					if (this.laserShotsTaken <= this.maxLaserShots) {
+						this.laserTimer = 0; // reset laser timer
+					}
+				}
 			}
 		}
 	});
@@ -455,6 +494,30 @@ window.onload = function() {
 		},
 	});
 
+	// Laser from powerup
+	var Laser = Class.create(Sprite, {
+		initialize: function(xpos, ypos) {
+			var imgPath = 'img/laser11x39.png';
+			// Call superclass constructor
+			Sprite.apply(this, [11, 39]);
+			this.image  = Game.instance.assets[imgPath];
+			this.rotationSpeed = 0;
+			this.x = xpos;
+			this.y = ypos;
+			this.addEventListener(Event.ENTER_FRAME, this.update);
+		},
+
+		update: function(evt) { 
+			var ySpeed = carSpeed;
+			
+			this.y -= ySpeed * evt.elapsed * 0.001;
+			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
+			if (this.y < 1) {
+				this.parentNode.removeChild(this);
+			}
+		}
+	});
+
 	// Abstract class for non-moving objects - scenery, coins, landmines
 	var StationaryObject = Class.create(Sprite, {
 		initialize: function(width, height, imgPath, xpos, ypos) {
@@ -490,7 +553,7 @@ window.onload = function() {
 		}
 	});
 
-	// Coins - e.g. Doge, PND
+	// Bomb dropped from jeep
 	var Bomb = Class.create(StationaryObject, {
 		initialize: function(xpos, ypos) {
 			var imgPath = 'img/bomb40.gif';
