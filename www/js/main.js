@@ -28,7 +28,7 @@ window.onload = function() {
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png',
-		'img/bomb40.gif', 'img/laser11x39.png'); 
+		'img/bomb40.gif', 'img/laser11x39.png', 'img/fire48.gif'); 
 
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
@@ -108,6 +108,7 @@ window.onload = function() {
 			this.coinGroup = new Group();
 			this.laserGroup = new Group();
 			this.enemyGroup = new Group();
+			this.fireGroup = new Group();
 
 			// 4 - Add child nodes        
 			this.addChild(bg);
@@ -117,6 +118,7 @@ window.onload = function() {
 			this.addChild(this.coinGroup);
 			this.addChild(this.laserGroup);
 			this.addChild(this.enemyGroup);
+			this.addChild(this.fireGroup);
 			this.addChild(car);
 			this.addChild(label);
 
@@ -233,7 +235,11 @@ window.onload = function() {
 					if (typeof snd['bump'] !== 'undefined') {
 						snd['bump'].play();
 					}
-					this.enemyGroup.removeChild(car);
+					//this.enemyGroup.removeChild(car);
+					this.car.isDead = true;
+					var fire = new Fire(this.car.x, this.car.y);
+					this.fireGroup.addChild(fire);
+
 					// Game over
 				    //this.bgm.stop();
 					Game.instance.replaceScene(new SceneGameOver(gameScore));
@@ -247,7 +253,11 @@ window.onload = function() {
 							snd['explosion'].play();
 						}
 						this.laserGroup.removeChild(laser);
-						this.enemyGroup.removeChild(car);
+						//this.enemyGroup.removeChild(car);
+						car.isDead = true;
+						var fire = new Fire(car.x, car.y);
+						this.fireGroup.addChild(fire);
+
 						this.setScore(gameScore += 50);
 					}
 				}
@@ -276,6 +286,11 @@ window.onload = function() {
 						snd['explosion'].play();
 					}
 					this.enemyGroup.removeChild(bomb);
+
+					this.car.isDead = true;
+					var fire = new Fire(this.car.x, this.car.y);
+					this.fireGroup.addChild(fire);
+
 					// Game over
 				    //this.bgm.stop();
 					Game.instance.replaceScene(new SceneGameOver(gameScore));
@@ -285,11 +300,11 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of coins
 			this.generateCoinTimer += evt.elapsed * 0.001;
-			timeBeforeNext = 9 + Math.floor(Math.random() * 5); // increase to make coins more rare
+			timeBeforeNext = 8 + Math.floor(Math.random() * 5); // increase to make coins more rare
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
 				var xpos = leftBorder + 10 + Math.floor(Math.random() * (rightBorder - leftBorder - 10));
-				var coin = Math.floor(Math.random() * 5) === 0 ? new Coin(xpos, 'pandacoin') : new Coin(xpos, 'dogecoin');
+				var coin = Math.floor(Math.random() * 4) === 0 ? new Coin(xpos, 'pandacoin') : new Coin(xpos, 'dogecoin');
 				this.coinGroup.addChild(coin);
 			}
 			// Check collision
@@ -302,10 +317,10 @@ window.onload = function() {
 					}
 					this.coinGroup.removeChild(coin);    
 					this.setScore(gameScore += coin.name === 'dogecoin' ? 5 : 10);
-					//if (coin.name === 'pandacoin') { // PND gives you lasers!
-					this.car.laserTimer = 0;
-					this.car.laserShotsTaken = 0; // reset shots taken
-					//}
+					if (coin.name === 'pandacoin') { // PND gives you lasers!
+						this.car.laserTimer = 0;
+						this.car.laserShotsTaken = 0; // reset shots taken
+					}
 				}
 				// Enemy cars can pick up coins too
 				for (var j = this.enemyGroup.childNodes.length - 1; j >= 0; j--) {
@@ -353,6 +368,7 @@ window.onload = function() {
 			Sprite.apply(this, [width, height]);
 			this.image = Game.instance.assets[imagePath];
 
+			this.isDead = false;
 			this.animationDuration = 0;
 			this.animationTimeIncrement = .50;
 			this.laserTimeIncrement = 1; // how many seconds between shots
@@ -447,7 +463,7 @@ window.onload = function() {
 
 		update: function(evt) { 
 			var game = Game.instance;
-			var ySpeed = 100;
+			var ySpeed = this.isDead ? carSpeed : 100;
 			//ySpeed = 150;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
@@ -461,6 +477,10 @@ window.onload = function() {
 			}
 
 			// NPC car can move left and right as well
+			if (this.isDead) {
+				return; // no need to calculate x position
+			}
+
 			var targetLaneXPos = game.width/2 - this.width/2 + (this.targetLane - 1) * 195;
 			if (this.lane !== this.targetLane && this.x > targetLaneXPos - 5 && 
 					this.x < targetLaneXPos + 5) {
@@ -539,6 +559,14 @@ window.onload = function() {
 			if (this.y > game.height) {
 				this.parentNode.removeChild(this);        
 			}
+		}
+	});
+
+	var Fire = Class.create(StationaryObject, {
+		initialize: function(xpos, ypos) {
+			var imgPath = 'img/fire48.gif';
+			// Call superclass constructor
+			StationaryObject.call(this, 48, 48, imgPath, xpos, ypos); 
 		}
 	});
 
