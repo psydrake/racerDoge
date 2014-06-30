@@ -15,7 +15,6 @@ var rightBorder = 518;
 var topBorder = 606;
 var bottomBorder = 870;
 var carSpeed = 300; // speed of still objects passing by
-var gameScore = 0;
 
 // 2 - On document load 
 window.onload = function() {
@@ -34,7 +33,7 @@ window.onload = function() {
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
 				'snd/170140__timgormly__8-bit-bumper.mp3', 'snd/170144__timgormly__8-bit-explosion2.mp3', 
 				'snd/170169__timgormly__8-bit-powerup.mp3', 'snd/170170__timgormly__8-bit-pickup.mp3', 
-				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/bgm.mp3');
+				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/170159__timgormly__8-bit-shimmer.mp3', 'snd/bgm.mp3');
 	}
 
 	// 5 - Game settings
@@ -53,13 +52,14 @@ window.onload = function() {
 		// load sounds if user is playing in browser - phonegap freezes up if we let android load game.assets for sound
 		if (typeof isWebapp !== 'undefined' && isWebapp) { 
 			if (typeof snd !== 'undefined') { // we are playing game in a browser - use enchant.js sound system
-				snd['coin'] = game.assets['snd/170147__timgormly__8-bit-coin.mp3']; // player picks up coin
+				snd['coin'] = game.assets['snd/170147__timgormly__8-bit-coin.mp3']; // player picks up DOGE
 				snd['bump'] = game.assets['snd/170141__timgormly__8-bit-bump.mp3']; // player gets hit by enemy car
 				snd['bumper'] = game.assets['snd/170140__timgormly__8-bit-bumper.mp3']; // jeep drops bomb
 				snd['explosion'] = game.assets['snd/170144__timgormly__8-bit-explosion2.mp3']; // player shot hits enemy, or player hits bomb
 				snd['powerup'] = game.assets['snd/170169__timgormly__8-bit-powerup.mp3']; 
 				snd['pickup'] = game.assets['snd/170170__timgormly__8-bit-pickup.mp3']; // player leaves enemy car in the dust
 				snd['laser'] = game.assets['snd/170161__timgormly__8-bit-laser.mp3']; // player shoots laser
+				snd['shimmer'] = game.assets['snd/170159__timgormly__8-bit-shimmer.mp3']; // player picks up PND - laser powerup!
 			}
 		}
 
@@ -81,7 +81,7 @@ window.onload = function() {
 			var game = Game.instance;
 			// 3 - Create child nodes
 			// Label
-			var label = new Label('SCORE<br/><br/>0');
+			var label = new Label('SCORE<br/>0');
 			label.x = 9;
 			label.y = 32;        
 			label.color = 'white';
@@ -90,7 +90,6 @@ window.onload = function() {
 			label._style.textShadow ="-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black";
 			this.scoreLabel = label;
 
-			//bg = new Sprite(320,440);
 			var bg = new Sprite(screenWidth, screenHeight);
 			bg.image = game.assets['img/gameBg.png'];
 
@@ -137,7 +136,8 @@ window.onload = function() {
 			this.generateEnemyTimer = 0;
 			this.generateBombTimer = 0;
 			this.scoreTimer = 0;
-			gameScore = 0;
+			this.score = 0;
+			this.scoreTimeIncrement = .5; // amount of time before score increases
 
 			// Background music
 			//this.bgm = game.assets['snd/bgm.mp3']; // Add this line
@@ -175,17 +175,15 @@ window.onload = function() {
 		},
 
 		setScore: function (value) {
-		    gameScore = value;
-		    this.scoreLabel.text = 'SCORE<br/>' + gameScore;
+		    this.score = value;
+		    this.scoreLabel.text = 'SCORE<br/>' + this.score;
 		},
-
-		scoreTimeIncrement: .5, // amount of time before score increases
 
 		update: function(evt) {
 			// Score increase as time passes
 			this.scoreTimer += evt.elapsed * 0.001;
 			if (this.scoreTimer >= this.scoreTimeIncrement) {
-				this.setScore(gameScore + 1);
+				this.setScore(this.score + 1);
 				this.scoreTimer -= this.scoreTimeIncrement;
 			}
 
@@ -242,7 +240,7 @@ window.onload = function() {
 
 					// Game over
 				    //this.bgm.stop();
-					Game.instance.replaceScene(new SceneGameOver(gameScore));
+					Game.instance.replaceScene(new SceneGameOver(this.score));
 				    break;
 				}
 
@@ -258,7 +256,7 @@ window.onload = function() {
 						var fire = new Fire(car.x, car.y);
 						this.fireGroup.addChild(fire);
 
-						this.setScore(gameScore += 50);
+						this.setScore(this.score += 50);
 					}
 				}
 
@@ -293,7 +291,7 @@ window.onload = function() {
 
 					// Game over
 				    //this.bgm.stop();
-					Game.instance.replaceScene(new SceneGameOver(gameScore));
+					Game.instance.replaceScene(new SceneGameOver(this.score));
 				    break;
 				}
 			}
@@ -312,11 +310,18 @@ window.onload = function() {
 				var coin = this.coinGroup.childNodes[i];
 
 				if (coin.intersect(this.car)) { // player car picks up coin
-					if (typeof snd['coin'] !== 'undefined') {
-						snd['coin'].play();
+					if (coin.name === 'dogecoin') {
+						if (typeof snd['coin'] !== 'undefined') {
+							snd['coin'].play();
+						}
+					}
+					else {
+						if (typeof snd['shimmer'] !== 'undefined') {
+							snd['shimmer'].play();
+						}
 					}
 					this.coinGroup.removeChild(coin);    
-					this.setScore(gameScore += coin.name === 'dogecoin' ? 5 : 10);
+					this.setScore(this.score += coin.name === 'dogecoin' ? 5 : 10);
 					if (coin.name === 'pandacoin') { // PND gives you lasers!
 						this.car.laserTimer = 0;
 						this.car.laserShotsTaken = 0; // reset shots taken
@@ -373,7 +378,7 @@ window.onload = function() {
 			this.animationTimeIncrement = .50;
 			this.laserTimeIncrement = 1; // how many seconds between shots
 			this.laserTimer = this.laserTimeIncrement + .001; // set to 0 to activate lasers
-			this.maxLaserShots = 8; // how many shots you get per powerup
+			this.maxLaserShots = 9; // how many shots you get per powerup
 			this.laserShotsTaken = 0; // how many shots have you taken this powerup?
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
@@ -386,6 +391,11 @@ window.onload = function() {
 			}
 
 			if (this.laserTimer < this.laserTimeIncrement && this.laserShotsTaken <= this.maxLaserShots) { // lasers are activated
+				if (this.laserTimer === 0 && this.laserShotsTaken === 0) {
+					if (typeof snd['laser'] !== 'undefined') {
+						snd['laser'].play();
+					}
+				}
 				this.laserTimer += evt.elapsed * 0.001;
 				if (this.laserTimer >= this.laserTimeIncrement) { // laser time!
 					var laser = new Laser(this.x, this.y - 30);
@@ -473,7 +483,7 @@ window.onload = function() {
 					snd['pickup'].play();
 				}
 				this.parentNode.removeChild(this);
-				gameScore += 10;
+				this.parentNode.setScore(this.parentNode.score += 10);
 			}
 
 			// NPC car can move left and right as well
@@ -508,7 +518,7 @@ window.onload = function() {
 				if (Math.floor(Math.random() * (100 / this.crazyConstant)) === 0) {
 					// car wants to move to a different lane
 					this.targetLane = Math.floor(Math.random() * 3);
-					console.log('changed target lane to:', this.targetLane);
+					//console.log('changed target lane to:', this.targetLane);
 				}
 			}
 		},
@@ -610,11 +620,11 @@ window.onload = function() {
 	var SceneGameOver = Class.create(Scene, {
 		initialize: function(score) {
 			if (score === 0) {
-				console.log('OPEN');
+				//console.log('OPEN');
 				trackPage('open');
 			}
 			else {
-				console.log('END');
+				//console.log('END');
 				trackPage('end');
 			}
 
@@ -624,18 +634,16 @@ window.onload = function() {
 			//	this.backgroundColor = 'rgb(0,0,0)'; // RGB value version
 
 			// Game Over label
-			var gameOverString = gameScore === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
+			var gameOverString = score === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
 			var gameOverLabel = new Label(gameOverString);
-			//gameOverLabel.x = 8;
 			gameOverLabel.x = game.width / 3;
-			//gameOverLabel.y = 164;
 			gameOverLabel.y = game.height / 2;
 			gameOverLabel.color = 'green';
 			gameOverLabel.font = '32px Comic Sans MS';
 			gameOverLabel.textAlign = 'center';
 
 			// Score label
-			var scoreLabel = new Label('SCORE<br/><br/>' + gameScore);
+			var scoreLabel = new Label('SCORE<br/><br/>' + score);
 			scoreLabel.x = game.width / 3;
 			scoreLabel.y = game.height / 3;
 			scoreLabel.color = 'pink';

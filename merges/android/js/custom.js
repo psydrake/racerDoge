@@ -29,6 +29,7 @@ function doCustomActions() {
 		snd['powerup'] = new Media(getPathMedia() + 'snd/170169__timgormly__8-bit-powerup.mp3');
 		snd['pickup'] = new Media(getPathMedia() + 'snd/170170__timgormly__8-bit-pickup.mp3');
 		snd['laser'] = new Media(getPathMedia() + 'snd/170161__timgormly__8-bit-laser.mp3');
+		snd['shimmer'] = new Media(getPathMedia() + 'snd/170159__timgormly__8-bit-shimmer.mp3');
 	}
 }
 
