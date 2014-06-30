@@ -378,7 +378,7 @@ window.onload = function() {
 			this.animationTimeIncrement = .50;
 			this.laserTimeIncrement = 1; // how many seconds between shots
 			this.laserTimer = this.laserTimeIncrement + .001; // set to 0 to activate lasers
-			this.maxLaserShots = 9; // how many shots you get per powerup
+			this.maxLaserShots = 10; // how many shots you get per powerup
 			this.laserShotsTaken = 0; // how many shots have you taken this powerup?
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
@@ -482,8 +482,9 @@ window.onload = function() {
 				if (typeof snd['pickup'] !== 'undefined') {
 					snd['pickup'].play();
 				}
+				this.parentNode.parentNode.setScore(this.parentNode.parentNode.score += 10);
 				this.parentNode.removeChild(this);
-				this.parentNode.setScore(this.parentNode.score += 10);
+				return;
 			}
 
 			// NPC car can move left and right as well
