@@ -32,7 +32,7 @@ window.onload = function() {
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
 				'snd/170140__timgormly__8-bit-bumper.mp3', 'snd/170144__timgormly__8-bit-explosion2.mp3', 
-				'snd/170169__timgormly__8-bit-powerup.mp3', 'snd/170170__timgormly__8-bit-pickup.mp3', 
+				'snd/170155__timgormly__8-bit-powerup1.mp3', 'snd/170170__timgormly__8-bit-pickup.mp3', 
 				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/170159__timgormly__8-bit-shimmer.mp3', 'snd/bgm.mp3');
 	}
 
@@ -56,7 +56,7 @@ window.onload = function() {
 				snd['bump'] = game.assets['snd/170141__timgormly__8-bit-bump.mp3']; // player gets hit by enemy car
 				snd['bumper'] = game.assets['snd/170140__timgormly__8-bit-bumper.mp3']; // jeep drops bomb
 				snd['explosion'] = game.assets['snd/170144__timgormly__8-bit-explosion2.mp3']; // player shot hits enemy, or player hits bomb
-				snd['powerup'] = game.assets['snd/170169__timgormly__8-bit-powerup.mp3']; 
+				snd['powerup'] = game.assets['snd/170155__timgormly__8-bit-powerup1.mp3']; // enemy drops coin
 				snd['pickup'] = game.assets['snd/170170__timgormly__8-bit-pickup.mp3']; // player leaves enemy car in the dust
 				snd['laser'] = game.assets['snd/170161__timgormly__8-bit-laser.mp3']; // player shoots laser
 				snd['shimmer'] = game.assets['snd/170159__timgormly__8-bit-shimmer.mp3']; // player picks up PND - laser powerup!
@@ -134,6 +134,7 @@ window.onload = function() {
 			this.generateSceneryTimer = 0;
 			this.generateCoinTimer = 0;
 			this.generateEnemyTimer = 0;
+			this.generateEnemyCoinTimer = 0;
 			this.generateBombTimer = 0;
 			this.scoreTimer = 0;
 			this.score = 0;
@@ -226,7 +227,7 @@ window.onload = function() {
 			}
 
 			// Check enemy car collision
-			for (var i = this.enemyGroup.childNodes.length - 1; i >= 0; i--) {
+			for (var i = 0; i < this.enemyGroup.childNodes.length; i++) {
 				var car = this.enemyGroup.childNodes[i];
 
 				if (car.intersect(this.car)) { // player car gets hit by enemy car!
@@ -268,6 +269,18 @@ window.onload = function() {
 						this.bombGroup.addChild(bomb);
 						if (typeof snd['bumper'] !== 'undefined') {
 							snd['bumper'].play();
+						}
+					}
+				} // grey and yellow cars drop litecoin and bitcoin!
+				else if (['grey car', 'yellow car'].indexOf(car.name) >= 0) { 
+					this.generateEnemyCoinTimer += evt.elapsed * 0.001;
+					timeBeforeNext = 5 + Math.floor(Math.random() * 4); // increase to make bombs more rare
+					if (this.generateEnemyCoinTimer >= timeBeforeNext) { 
+						this.generateEnemyCoinTimer -= timeBeforeNext;
+						var coinName = car.name === 'grey car' ? 'litecoin' : 'bitcoin';
+						this.coinGroup.addChild(new Coin(car.x, car.y + 30, coinName));
+						if (typeof snd['powerup'] !== 'undefined') {
+							snd['powerup'].play();
 						}
 					}
 				}
@@ -313,11 +326,12 @@ window.onload = function() {
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
 				var xpos = leftBorder + 10 + Math.floor(Math.random() * (rightBorder - leftBorder - 10));
-				var coin = Math.floor(Math.random() * 4) === 0 ? new Coin(xpos, 'pandacoin') : new Coin(xpos, 'dogecoin');
+				var coin = Math.floor(Math.random() * 4) === 0 ? new Coin(xpos, null, 'pandacoin') : new Coin(xpos, null, 'dogecoin');
 				this.coinGroup.addChild(coin);
 			}
 			// Check collision
-			for (var i = this.coinGroup.childNodes.length - 1; i >= 0; i--) {
+			//for (var i = 0; i < this.coinGroup.childNodes.length + this.enemyCoinGroup.childNodes.length; i++) {
+			for (var i = 0; i < this.coinGroup.childNodes.length; i++) {
 				var coin = this.coinGroup.childNodes[i];
 
 				if (coin.intersect(this.car)) { // player car picks up coin
@@ -331,18 +345,20 @@ window.onload = function() {
 							snd['shimmer'].play();
 						}
 					}
-					this.coinGroup.removeChild(coin);    
-					this.setScore(this.score += coin.name === 'dogecoin' ? 5 : 10);
+					this.coinGroup.removeChild(coin);
+					var scoreIncr = 10;
+					switch (coin.name) {
+						case 'litecoin':
+							scoreIncr = 25;
+							break;
+						case 'bitcoin':
+							scoreIncr = 50;
+							break;
+					}
+					this.setScore(this.score += scoreIncr);
 					if (coin.name === 'pandacoin') { // PND gives you lasers!
 						this.car.laserTimer = 0;
 						this.car.laserShotsTaken = 0; // reset shots taken
-					}
-				}
-				// Enemy cars can pick up coins too
-				for (var j = this.enemyGroup.childNodes.length - 1; j >= 0; j--) {
-					var enemy = this.enemyGroup.childNodes[j];
-					if (coin.intersect(enemy)) {
-						this.coinGroup.removeChild(coin);    
 					}
 				}
 			}
@@ -605,10 +621,10 @@ window.onload = function() {
 
 	// Coins - e.g. Doge, PND
 	var Coin = Class.create(StationaryObject, {
-		initialize: function(xpos, name) {
+		initialize: function(xpos, ypos, name) {
 			this.name = name;
 			// Call superclass constructor
-			StationaryObject.call(this, 64, 64, 'img/' + name + '64.png', xpos, null, 1);
+			StationaryObject.call(this, 64, 64, 'img/' + name + '64.png', xpos, ypos, 1);
 		}
 	});
 
