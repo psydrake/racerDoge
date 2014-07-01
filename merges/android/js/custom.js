@@ -18,7 +18,6 @@ function getPathMedia() {
 var snd = {}; // each custom.js must define this
 function doCustomActions() {
 	if (typeof analytics !== "undefined") {
-		alert('analytics:', analytics);
 		analytics.startTrackerWithId('UA-52101670-2');
 	}
 	if (typeof snd !== 'undefined') { // using android device, so use Phonegap audio system

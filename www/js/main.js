@@ -14,7 +14,7 @@ var leftBorder = 112;
 var rightBorder = 518;
 var topBorder = 606;
 var bottomBorder = 870;
-var carSpeed = 300; // speed of still objects passing by
+var carSpeed = 320; // speed of still objects passing by
 
 // 2 - On document load 
 window.onload = function() {
@@ -52,7 +52,7 @@ window.onload = function() {
 		// load sounds if user is playing in browser - phonegap freezes up if we let android load game.assets for sound
 		if (typeof isWebapp !== 'undefined' && isWebapp) { 
 			if (typeof snd !== 'undefined') { // we are playing game in a browser - use enchant.js sound system
-				snd['coin'] = game.assets['snd/170147__timgormly__8-bit-coin.mp3']; // player picks up DOGE
+				snd['coin'] = game.assets['snd/170147__timgormly__8-bit-coin.mp3']; // player picks up any non PND coin
 				snd['bump'] = game.assets['snd/170141__timgormly__8-bit-bump.mp3']; // player gets hit by enemy car
 				snd['bumper'] = game.assets['snd/170140__timgormly__8-bit-bumper.mp3']; // jeep drops bomb
 				snd['explosion'] = game.assets['snd/170144__timgormly__8-bit-explosion2.mp3']; // player shot hits enemy, or player hits bomb
@@ -330,19 +330,18 @@ window.onload = function() {
 				this.coinGroup.addChild(coin);
 			}
 			// Check collision
-			//for (var i = 0; i < this.coinGroup.childNodes.length + this.enemyCoinGroup.childNodes.length; i++) {
 			for (var i = 0; i < this.coinGroup.childNodes.length; i++) {
 				var coin = this.coinGroup.childNodes[i];
 
 				if (coin.intersect(this.car)) { // player car picks up coin
-					if (coin.name === 'dogecoin') {
-						if (typeof snd['coin'] !== 'undefined') {
-							snd['coin'].play();
-						}
-					}
-					else {
+					if (coin.name === 'pandacoin') {
 						if (typeof snd['shimmer'] !== 'undefined') {
 							snd['shimmer'].play();
+						}
+					}
+					else { 
+						if (typeof snd['coin'] !== 'undefined') {
+							snd['coin'].play();
 						}
 					}
 					this.coinGroup.removeChild(coin);
@@ -668,7 +667,7 @@ window.onload = function() {
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
 			var gameOverLabel = new Label(gameOverString);
-			gameOverLabel.x = game.width / 3;
+			gameOverLabel.x = game.width / 4;
 			gameOverLabel.y = game.height / 2;
 			gameOverLabel.color = 'green';
 			gameOverLabel.font = '32px Comic Sans MS';
@@ -676,7 +675,7 @@ window.onload = function() {
 
 			// Score label
 			var scoreLabel = new Label('SCORE<br/><br/>' + score);
-			scoreLabel.x = game.width / 3;
+			scoreLabel.x = game.width / 4;
 			scoreLabel.y = game.height / 3;
 			scoreLabel.color = 'pink';
 			scoreLabel.font = '32px Comic Sans MS';
