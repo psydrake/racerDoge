@@ -27,7 +27,7 @@ window.onload = function() {
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png',
-		'img/bomb40.gif', 'img/laser11x39.png', 'img/fire48.gif', 'img/bitcoin64.png', 'img/litecoin64.png'); 
+		'img/bombSheet.png', 'img/laser11x39.png', 'img/fireSheet.png', 'img/bitcoin64.png', 'img/litecoin64.png'); 
 
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
@@ -458,7 +458,6 @@ window.onload = function() {
 			this.setLane(lane);
 			this.targetLane = lane; // car is moving to a different lane
 			this.addEventListener(Event.ENTER_FRAME, this.update);
-			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
 		setLane: function(lane) {
@@ -522,7 +521,7 @@ window.onload = function() {
 					//console.log('changed target lane to:', this.targetLane);
 				}
 			}
-		},
+		}
 	});
 
 	// Laser from powerup
@@ -551,13 +550,19 @@ window.onload = function() {
 
 	// Abstract class for non-moving objects - scenery, coins, landmines
 	var StationaryObject = Class.create(Sprite, {
-		initialize: function(width, height, imgPath, xpos, ypos) {
+		initialize: function(width, height, imgPath, xpos, ypos, frames) {
 			// Call superclass constructor
 			Sprite.apply(this, [width, height]);
 			this.image  = Game.instance.assets[imgPath];
 			this.rotationSpeed = 0;
 			this.x = xpos ? xpos : Math.floor(Math.random() * 2) === 0 ? this.width / 2 : game.width - (this.width * 1.5);
 			this.y = ypos ? ypos : -this.height;
+			if (frames  && frames > 1) {
+				this.frames = frames;
+				this.animationDuration = 0;
+				this.animationTimeIncrement = .40;
+				this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
+			}
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 		},
 
@@ -566,18 +571,24 @@ window.onload = function() {
 			var ySpeed = carSpeed;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
-			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
 			if (this.y > game.height) {
 				this.parentNode.removeChild(this);        
+			}
+		},
+
+		updateAnimation: function(evt) {
+			this.animationDuration += evt.elapsed * 0.001;
+			if (this.animationDuration >= this.animationTimeIncrement) {
+				this.frame = (this.frame + 1) % this.frames;
+				this.animationDuration -= this.animationTimeIncrement;
 			}
 		}
 	});
 
 	var Fire = Class.create(StationaryObject, {
-		initialize: function(xpos, ypos) {
-			var imgPath = 'img/fire48.gif';
+		initialize: function(xpos, ypos) {			
 			// Call superclass constructor
-			StationaryObject.call(this, 48, 48, imgPath, xpos, ypos); 
+			StationaryObject.call(this, 48, 48, 'img/fireSheet.png', xpos, ypos, 3); 
 		}
 	});
 
@@ -585,19 +596,16 @@ window.onload = function() {
 	var Coin = Class.create(StationaryObject, {
 		initialize: function(xpos, name) {
 			this.name = name;
-			var imgPath = 'img/' + name + '64.png';
-			//var ypos = -this.height;    
 			// Call superclass constructor
-			StationaryObject.call(this, 64, 64, imgPath, xpos, null); 
+			StationaryObject.call(this, 64, 64, 'img/' + name + '64.png', xpos, null, 1);
 		}
 	});
 
 	// Bomb dropped from jeep
 	var Bomb = Class.create(StationaryObject, {
-		initialize: function(xpos, ypos) {
-			var imgPath = 'img/bomb40.gif';
+		initialize: function(xpos, ypos) {			
 			// Call superclass constructor
-			StationaryObject.call(this, 40, 40, imgPath, xpos, ypos); 
+			StationaryObject.call(this, 40, 40, 'img/bombSheet.png', xpos, ypos, 2);
 		}
 	});
 
@@ -605,7 +613,7 @@ window.onload = function() {
 	var Scenery = Class.create(StationaryObject, {
 		initialize: function(imgPath) {
 			// Call superclass constructor
-			StationaryObject.call(this, 64, 64, imgPath, null, null); 
+			StationaryObject.call(this, 64, 64, imgPath, null, null, 1); 
 		}
 	});
 
@@ -614,25 +622,21 @@ window.onload = function() {
 		initialize: function() {			
 			xpos = Game.instance.width / 2;
 			// Call superclass constructor
-			StationaryObject.call(this, 8, 40, 'img/whiteLaneStripe8x40.png', xpos, null); 
+			StationaryObject.call(this, 8, 40, 'img/whiteLaneStripe8x40.png', xpos, null, 1); 
 		}
 	});
 
 	var SceneGameOver = Class.create(Scene, {
 		initialize: function(score) {
 			if (score === 0) {
-				//console.log('OPEN');
 				trackPage('open');
 			}
 			else {
-				//console.log('END');
 				trackPage('end');
 			}
 
 			Scene.apply(this);
 			this.backgroundColor = 'black';
-			//	this.backgroundColor = '#000000'; // Hex Color Code version
-			//	this.backgroundColor = 'rgb(0,0,0)'; // RGB value version
 
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
@@ -656,7 +660,6 @@ window.onload = function() {
 			this.addChild(scoreLabel);
 
 			// Listen for taps
-			//this.addEventListener(Event.TOUCH_START, this.touchToRestart);
 			gameOverLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
 		},
 
