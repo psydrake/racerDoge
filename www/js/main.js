@@ -229,14 +229,13 @@ window.onload = function() {
 			for (var i = this.enemyGroup.childNodes.length - 1; i >= 0; i--) {
 				var car = this.enemyGroup.childNodes[i];
 
-				if (car.intersect(this.car)) { // player car gets hit!
+				if (car.intersect(this.car)) { // player car gets hit by enemy car!
 					if (typeof snd['bump'] !== 'undefined') {
 						snd['bump'].play();
 					}
-					//this.enemyGroup.removeChild(car);
 					this.car.isDead = true;
-					var fire = new Fire(this.car.x, this.car.y);
-					this.fireGroup.addChild(fire);
+					//var fire = new Fire(this.car.x, this.car.y + 10);
+					//this.fireGroup.addChild(fire);
 
 					// Game over
 				    //this.bgm.stop();
@@ -246,14 +245,13 @@ window.onload = function() {
 
 				for (var j = 0; j < this.laserGroup.childNodes.length; j++) {
 					var laser = this.laserGroup.childNodes[j];
-					if (car.intersect(laser)) {
+					if (car.intersect(laser)) { // enemy car is hit by laser
 						if (typeof snd['explosion'] !== 'undefined') {
 							snd['explosion'].play();
 						}
 						this.laserGroup.removeChild(laser);
-						//this.enemyGroup.removeChild(car);
 						car.isDead = true;
-						var fire = new Fire(car.x, car.y);
+						var fire = new Fire(car.x, car.y + 10);
 						this.fireGroup.addChild(fire);
 
 						this.setScore(this.score += 50);
@@ -286,13 +284,26 @@ window.onload = function() {
 					this.enemyGroup.removeChild(bomb);
 
 					this.car.isDead = true;
-					var fire = new Fire(this.car.x, this.car.y);
-					this.fireGroup.addChild(fire);
+					//var fire = new Fire(this.car.x, this.car.y + 10);
+					//this.fireGroup.addChild(fire);
 
 					// Game over
 				    //this.bgm.stop();
 					Game.instance.replaceScene(new SceneGameOver(this.score));
 				    break;
+				}
+
+				// Check laser collision with bomb
+				for (var j = 0; j < this.laserGroup.childNodes.length; j++) {
+					var laser = this.laserGroup.childNodes[j];
+
+					if (bomb.intersect(laser)) { // laser hits a bomb
+						if (typeof snd['explosion'] !== 'undefined') {
+							snd['explosion'].play();
+						}
+						this.bombGroup.removeChild(bomb);
+						this.laserGroup.removeChild(laser);
+					}
 				}
 			}
 
