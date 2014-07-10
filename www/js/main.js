@@ -338,7 +338,10 @@ window.onload = function() {
 						if (typeof snd['shimmer'] !== 'undefined') {
 							snd['shimmer'].play();
 						}
-						this.car.image = Game.instance.assets['img/dogeCarPowerupSheet.png'];
+
+						if (coin.name === 'dogecoin') {
+							this.car.powerupArmor();
+						}
 					}
 					else { 
 						if (typeof snd['coin'] !== 'undefined') {
@@ -403,20 +406,38 @@ window.onload = function() {
 			this.isDead = false;
 			this.animationDuration = 0;
 			this.animationTimeIncrement = .50;
-			this.laserTimeIncrement = 1; // how many seconds between shots
-			this.laserTimer = this.laserTimeIncrement + .001; // set to 0 to activate lasers
-			this.maxLaserShots = 10; // how many shots you get per powerup
-			this.laserShotsTaken = 0; // how many shots have you taken this powerup?
+
+			this.rotationSpeed = 0;
 			this.addEventListener(Event.ENTER_FRAME, this.updateAnimation);
 		},
 
 		updateAnimation: function(evt) {
 			this.animationDuration += evt.elapsed * 0.001;
 			if (this.animationDuration >= this.animationTimeIncrement) {
-				this.frame = (this.frame + 1) % 2;
-				this.animationDuration -= this.animationTimeIncrement;
+				this.frame = (this.frame + 1) % 2; // which vehicle frame to show from image sheet
+				this.animationDuration -= this.animationTimeIncrement; // reset animation
 			}
+		}
+	});
 
+	var DogeCar = Class.create(Vehicle, {
+		// The player character.     
+		initialize: function() {
+			// 1 - Call superclass constructor
+			Vehicle.call(this, 65, 82, 'img/dogeCarSheet.png'); 
+
+			this.laserTimeIncrement = 1; // how many seconds between shots
+			this.laserTimer = this.laserTimeIncrement + .001; // set to 0 to activate lasers
+			this.maxLaserShots = 10; // how many shots you get per powerup
+			this.laserShotsTaken = 0; // how many shots have you taken this powerup?
+
+			this.maxArmorTimer = 10; // how long does the armor powerup last?
+			this.armorTimer = this.maxArmorTimer; // set to 0 to activate armor powerup
+
+			this.addEventListener(Event.ENTER_FRAME, this.updateDogeCarAnimation);
+		},
+
+		updateDogeCarAnimation: function(evt) {
 			if (this.laserTimer < this.laserTimeIncrement && this.laserShotsTaken <= this.maxLaserShots) { // lasers are activated
 				if (this.laserTimer === 0 && this.laserShotsTaken === 0) {
 					if (typeof snd['laser'] !== 'undefined') {
@@ -436,14 +457,21 @@ window.onload = function() {
 					}
 				}
 			}
-		}
-	});
 
-	var DogeCar = Class.create(Vehicle, {
-		// The player character.     
-		initialize: function() {
-			// 1 - Call superclass constructor
-			Vehicle.call(this, 65, 82, 'img/dogeCarSheet.png'); 
+			if (this.armorTimer < this.maxArmorTimer) {
+				// if armor timer is activated, continue running the timer
+				this.armorTimer += evt.elapsed * 0.001;
+			}
+			else if (this.armorTimer > this.armorTimer) {
+				// if armor timer reached the end, stop the powerup
+				this.armorTimer = this.maxArmorTimer;
+				this.image = Game.instance.assets['img/dogeCarSheet.png'];
+			}
+		},
+
+		powerupArmor: function() { // start the armor powerup
+			this.image = Game.instance.assets['img/dogeCarPowerupSheet.png'];
+			this.armorTimer = 0; // 0 starts the timer
 		},
 
 		move: function(xdir, ydir, increment) {
@@ -481,7 +509,6 @@ window.onload = function() {
 			this.crazyConstant = crazyConstant; // how crazy is the driver? number between 1-10 
 			this.ySpeed = 95 + Math.floor(Math.random() * 10);
 
-			this.rotationSpeed = 0;
 			this.setLane(lane);
 			this.targetLane = lane; // car is moving to a different lane
 			this.addEventListener(Event.ENTER_FRAME, this.update);
@@ -500,7 +527,6 @@ window.onload = function() {
 		update: function(evt) { 
 			var game = Game.instance;
 			var ySpeed = this.isDead ? carSpeed : 100;
-			//ySpeed = 150;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
 			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
