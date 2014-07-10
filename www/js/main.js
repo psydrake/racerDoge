@@ -177,6 +177,23 @@ window.onload = function() {
 			this.car.move(xdir, ydir, 2);
 		},
 
+		createLabel: function(text, color, xpos, ypos) {
+			var label = new Label(text);
+			label.color = color;
+			label.x = xpos;
+			label.y = ypos;
+			label.font = '32px Comic Sans MS';
+			label.textAlign = 'center';
+			label.tick = 0;
+			label.addEventListener(Event.ENTER_FRAME, function() {
+				label.tick++;
+				if (label.tick > 80)  {
+					this.parentNode.removeChild(label);
+				}
+			});
+			return label;
+		},
+
 		setScore: function (value) {
 		    this.score = value;
 		    this.scoreLabel.text = 'SCORE<br/>' + this.score;
@@ -241,8 +258,10 @@ window.onload = function() {
 						var smoke = new Smoke(car.x, car.y);
 						this.smokeGroup.addChild(smoke);
 						this.enemyGroup.removeChild(car);
-
-						this.setScore(this.score += 50);
+						
+						this.addChild(this.createLabel('much destruct!', 'orange', car.x, car.y));
+                        
+						this.setScore(this.score += 50);				
 					}
 					else { // if no armor powerup, doge car is destroyed. much sad
 						if (typeof snd['bump'] !== 'undefined') {
@@ -266,11 +285,22 @@ window.onload = function() {
 							snd['explosion'].play();
 						}
 						this.laserGroup.removeChild(laser);
-						car.isDead = true;
-						var fire = new Fire(car.x + 12, car.y + 10);
-						this.fireGroup.addChild(fire);
+						if (!car.isDead) {
+							car.isDead = true;
+							var fire = new Fire(car.x + 12, car.y + 10);
+							this.fireGroup.addChild(fire);
 
-						this.setScore(this.score += 50);
+							this.addChild(this.createLabel('wow such laser!', 'yellow', car.x, car.y));
+							this.setScore(this.score += 50);
+						}
+						else { // car is already dead - remove car wreck
+							this.smokeGroup.addChild(new Smoke(car.x, car.y));
+
+							this.addChild(this.createLabel('die moar pls', 'pink', car.x, car.y));
+							this.setScore(this.score += 15);
+
+							this.enemyGroup.removeChild(car);
+						}
 					}
 				}
 
@@ -619,32 +649,6 @@ window.onload = function() {
 			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
 			if (this.y < 1) {
 				this.parentNode.removeChild(this);
-			}
-		}
-	});
-
-	var LabelObject = Class.create(Label, {
-		initialize: function(width, height, imgPath, xpos, ypos, frames) {
-			// Call superclass constructor
-			Sprite.apply(this, [width, height]);
-
-			var label = new Label('SCORE<br/><br/>' + score);
-			label.x = game.width / 4;
-			label.y = game.height / 3;
-			label.color = 'pink';
-			label.font = '32px Comic Sans MS';
-			label.textAlign = 'center';
-
-			// Add labels
-			this.parentNode.addChild(label);
-			this.addEventListener(Event.ENTER_FRAME, this.update);
-		},
-
-		update: function(evt) {
-			this.animationDuration += evt.elapsed * 0.001;
-			if (this.animationDuration >= this.animationTimeIncrement) {
-				this.frame = (this.frame + 1) % this.frames;
-				this.animationDuration -= this.animationTimeIncrement;
 			}
 		}
 	});
