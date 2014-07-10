@@ -33,7 +33,7 @@ window.onload = function() {
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
 				'snd/170140__timgormly__8-bit-bumper.mp3', 'snd/170144__timgormly__8-bit-explosion2.mp3', 
 				'snd/170155__timgormly__8-bit-powerup1.mp3', 'snd/170170__timgormly__8-bit-pickup.mp3', 
-				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/170159__timgormly__8-bit-shimmer.mp3', 'snd/bgm.mp3');
+				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/170159__timgormly__8-bit-shimmer.mp3', 'snd/RacerDoge.mp3');
 	}
 
 	// 5 - Game settings
@@ -60,6 +60,7 @@ window.onload = function() {
 				snd['pickup'] = game.assets['snd/170170__timgormly__8-bit-pickup.mp3']; // player leaves enemy car in the dust
 				snd['laser'] = game.assets['snd/170161__timgormly__8-bit-laser.mp3']; // player shoots laser
 				snd['shimmer'] = game.assets['snd/170159__timgormly__8-bit-shimmer.mp3']; // player picks up PND - laser powerup!
+				snd['bgm'] = game.assets['snd/RacerDoge.mp3']; // player picks up PND - laser powerup!
 			}
 		}
 
@@ -145,7 +146,9 @@ window.onload = function() {
 			// Background music
 			//this.bgm = game.assets['snd/bgm.mp3']; // Add this line
 			// Start BGM
-			//this.bgm.play();
+			if (typeof snd['bgm'] !== 'undefined') {
+				snd['bgm'].play();
+			}
 		},
 
 		// user clicks on area of screen
@@ -272,7 +275,9 @@ window.onload = function() {
 						//this.fireGroup.addChild(fire);
 
 						// Game over
-					    //this.bgm.stop();
+						if (typeof snd['bgm'] !== 'undefined') {
+						    snd['bgm'].stop();
+						}
 						Game.instance.replaceScene(new SceneGameOver(this.score));
 					    break;
 					}
@@ -354,7 +359,9 @@ window.onload = function() {
 						//this.fireGroup.addChild(fire);
 
 						// Game over
-					    //this.bgm.stop();
+						if (typeof snd['bgm'] !== 'undefined') {
+						    snd['bgm'].stop();
+						}
 						Game.instance.replaceScene(new SceneGameOver(this.score));
 					    break;
 					}
@@ -430,9 +437,11 @@ window.onload = function() {
 				firstSceneryMoment = false;
 			}
 			// Loop BGM
-			//if (this.bgm.currentTime >= this.bgm.duration ){
-			//	this.bgm.play();
-			//}
+			if (typeof snd['bgm'] !== 'undefined') {
+				if (snd['bgm'].currentTime >= snd['bgm'].duration ) {
+					snd['bgm'].play();
+				}
+			}
 
 			var game = Game.instance;
 			if (game.input.left && !game.input.right) {
