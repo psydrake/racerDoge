@@ -346,11 +346,11 @@ window.onload = function() {
 
 			// Check if it's time to create a new set of coins
 			this.generateCoinTimer += evt.elapsed * 0.001;
-			timeBeforeNext = 8 + Math.floor(Math.random() * 5); // increase to make coins more rare
+			timeBeforeNext = 8 + Math.floor(Math.random() * 14); // increase to make coins more rare
 			if (this.generateCoinTimer >= timeBeforeNext) { 
 				this.generateCoinTimer -= timeBeforeNext;
 				var xpos = leftBorder + 10 + Math.floor(Math.random() * (rightBorder - leftBorder - 10));
-				var coin = Math.floor(Math.random() * 4) === 0 ? new Coin(xpos, null, 'pandacoin') : new Coin(xpos, null, 'dogecoin');
+				var coin = Math.floor(Math.random() * 3) === 0 ? new Coin(xpos, null, 'pandacoin') : new Coin(xpos, null, 'dogecoin');
 				this.coinGroup.addChild(coin);
 			}
 			// Check collision
