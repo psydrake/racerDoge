@@ -27,7 +27,8 @@ window.onload = function() {
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogeCarPowerupSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png', 'img/smokeSheet.png',
-		'img/bombSheet.png', 'img/laser11x39.png', 'img/fireSheet.png', 'img/bitcoin64.png', 'img/litecoin64.png'); 
+		'img/bombSheet.png', 'img/laser11x39.png', 'img/fireSheet.png', 'img/bitcoin64.png', 'img/litecoin64.png',
+		'img/pixelDoge250.png', 'img/racerDoge256.png'); 
 
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
@@ -764,6 +765,12 @@ window.onload = function() {
 			Scene.apply(this);
 			this.backgroundColor = 'black';
 
+			var game = Game.instance;
+			var smartDoge = new Sprite(250, 250);
+			smartDoge.image = game.assets['img/pixelDoge250.png'];
+			smartDoge.x = game.width / 2;
+			smartDoge.y = game.height * 2/3;
+
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
 			var gameOverLabel = new Label(gameOverString);
@@ -780,6 +787,8 @@ window.onload = function() {
 			scoreLabel.color = 'pink';
 			scoreLabel.font = '32px Comic Sans MS';
 			scoreLabel.textAlign = 'center';
+
+			this.addChild(smartDoge);
 
 			// Add labels
 			this.addChild(gameOverLabel);
