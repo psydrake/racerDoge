@@ -24,7 +24,7 @@ window.onload = function() {
 	var game = new Game(screenWidth, screenHeight);
 
 	// 4 - Preload resources
-	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
+	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogeCarPowerupSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png',
 		'img/bombSheet.png', 'img/laser11x39.png', 'img/fireSheet.png', 'img/bitcoin64.png', 'img/litecoin64.png'); 
@@ -334,10 +334,11 @@ window.onload = function() {
 				var coin = this.coinGroup.childNodes[i];
 
 				if (coin.intersect(this.car)) { // player car picks up coin
-					if (coin.name === 'pandacoin') {
+					if (['pandacoin', 'dogecoin'].indexOf(coin.name) >= 0) {
 						if (typeof snd['shimmer'] !== 'undefined') {
 							snd['shimmer'].play();
 						}
+						this.car.image = Game.instance.assets['img/dogeCarPowerupSheet.png'];
 					}
 					else { 
 						if (typeof snd['coin'] !== 'undefined') {
@@ -574,6 +575,32 @@ window.onload = function() {
 		}
 	});
 
+	var LabelObject = Class.create(Label, {
+		initialize: function(width, height, imgPath, xpos, ypos, frames) {
+			// Call superclass constructor
+			Sprite.apply(this, [width, height]);
+
+			var label = new Label('SCORE<br/><br/>' + score);
+			label.x = game.width / 4;
+			label.y = game.height / 3;
+			label.color = 'pink';
+			label.font = '32px Comic Sans MS';
+			label.textAlign = 'center';
+
+			// Add labels
+			this.parentNode.addChild(label);
+			this.addEventListener(Event.ENTER_FRAME, this.update);
+		},
+
+		update: function(evt) {
+			this.animationDuration += evt.elapsed * 0.001;
+			if (this.animationDuration >= this.animationTimeIncrement) {
+				this.frame = (this.frame + 1) % this.frames;
+				this.animationDuration -= this.animationTimeIncrement;
+			}
+		}
+	});
+
 	// Abstract class for non-moving objects - scenery, coins, landmines
 	var StationaryObject = Class.create(Sprite, {
 		initialize: function(width, height, imgPath, xpos, ypos, frames) {
@@ -686,7 +713,8 @@ window.onload = function() {
 			this.addChild(scoreLabel);
 
 			// Listen for taps
-			gameOverLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
+			//gameOverLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
+			this.addEventListener(Event.TOUCH_START, this.touchToRestart);
 		},
 
 		touchToRestart: function(evt) {
