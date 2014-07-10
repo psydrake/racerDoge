@@ -143,11 +143,14 @@ window.onload = function() {
 			this.score = 0;
 			this.scoreTimeIncrement = .5; // amount of time before score increases
 
-			// Background music
-			//this.bgm = game.assets['snd/bgm.mp3']; // Add this line
-			// Start BGM
+			// Start Background music
 			if (typeof snd['bgm'] !== 'undefined') {
-				snd['bgm'].play();
+				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
+					snd['bgm'].play();
+				}
+				else { // cordova
+					snd['bgm'].play({numberOfLoops:"infinite"});
+				}
 			}
 		},
 
@@ -436,8 +439,10 @@ window.onload = function() {
 				this.sceneryGroup.addChild(scenery);
 				firstSceneryMoment = false;
 			}
+
 			// Loop BGM
-			if (typeof snd['bgm'] !== 'undefined') {
+			if (typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
+				typeof snd['bgm'] !== 'undefined') {
 				if (snd['bgm'].currentTime >= snd['bgm'].duration ) {
 					snd['bgm'].play();
 				}
