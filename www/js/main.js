@@ -26,7 +26,7 @@ window.onload = function() {
 	// 4 - Preload resources
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogeCarPowerupSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
-		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png',
+		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png', 'img/smokeSheet.png',
 		'img/bombSheet.png', 'img/laser11x39.png', 'img/fireSheet.png', 'img/bitcoin64.png', 'img/litecoin64.png'); 
 
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
@@ -107,6 +107,7 @@ window.onload = function() {
 			this.coinGroup = new Group();
 			this.laserGroup = new Group();
 			this.enemyGroup = new Group();
+			this.smokeGroup = new Group();			
 			this.fireGroup = new Group();
 
 			// 4 - Add child nodes        
@@ -117,6 +118,7 @@ window.onload = function() {
 			this.addChild(this.coinGroup);
 			this.addChild(this.laserGroup);
 			this.addChild(this.enemyGroup);
+			this.addChild(this.smokeGroup);
 			this.addChild(this.fireGroup);
 			this.addChild(car);
 			this.addChild(label);
@@ -231,17 +233,30 @@ window.onload = function() {
 				var car = this.enemyGroup.childNodes[i];
 
 				if (car.intersect(this.car)) { // player car gets hit by enemy car!
-					if (typeof snd['bump'] !== 'undefined') {
-						snd['bump'].play();
-					}
-					this.car.isDead = true;
-					//var fire = new Fire(this.car.x, this.car.y + 10);
-					//this.fireGroup.addChild(fire);
+					if (this.car.armorTimer < this.car.maxArmorTimer) {
+						// if doge car has armor powerup, enemy is destroyed
+						if (typeof snd['explosion'] !== 'undefined') {
+							snd['explosion'].play();
+						}
+						var smoke = new Smoke(car.x, car.y);
+						this.smokeGroup.addChild(smoke);
+						this.enemyGroup.removeChild(car);
 
-					// Game over
-				    //this.bgm.stop();
-					Game.instance.replaceScene(new SceneGameOver(this.score));
-				    break;
+						this.setScore(this.score += 50);
+					}
+					else { // if no armor powerup, doge car is destroyed. much sad
+						if (typeof snd['bump'] !== 'undefined') {
+							snd['bump'].play();
+						}
+						this.car.isDead = true;
+						//var fire = new Fire(this.car.x, this.car.y);
+						//this.fireGroup.addChild(fire);
+
+						// Game over
+					    //this.bgm.stop();
+						Game.instance.replaceScene(new SceneGameOver(this.score));
+					    break;
+					}
 				}
 
 				for (var j = 0; j < this.laserGroup.childNodes.length; j++) {
@@ -252,7 +267,7 @@ window.onload = function() {
 						}
 						this.laserGroup.removeChild(laser);
 						car.isDead = true;
-						var fire = new Fire(car.x, car.y + 10);
+						var fire = new Fire(car.x + 12, car.y + 10);
 						this.fireGroup.addChild(fire);
 
 						this.setScore(this.score += 50);
@@ -294,16 +309,25 @@ window.onload = function() {
 					if (typeof snd['explosion'] !== 'undefined') {
 						snd['explosion'].play();
 					}
-					this.enemyGroup.removeChild(bomb);
+					this.bombGroup.removeChild(bomb);
 
-					this.car.isDead = true;
-					//var fire = new Fire(this.car.x, this.car.y + 10);
-					//this.fireGroup.addChild(fire);
+					if (this.car.armorTimer < this.car.maxArmorTimer) {
+						// if doge car has armor powerup, enemy is destroyed
+						var smoke = new Smoke(bomb.x, bomb.y);
+						this.smokeGroup.addChild(smoke);
 
-					// Game over
-				    //this.bgm.stop();
-					Game.instance.replaceScene(new SceneGameOver(this.score));
-				    break;
+						this.setScore(this.score += 15);
+					}
+					else {
+						this.car.isDead = true;
+						//var fire = new Fire(this.car.x, this.car.y + 10);
+						//this.fireGroup.addChild(fire);
+
+						// Game over
+					    //this.bgm.stop();
+						Game.instance.replaceScene(new SceneGameOver(this.score));
+					    break;
+					}
 				}
 
 				// Check laser collision with bomb
@@ -338,7 +362,6 @@ window.onload = function() {
 						if (typeof snd['shimmer'] !== 'undefined') {
 							snd['shimmer'].play();
 						}
-
 						if (coin.name === 'dogecoin') {
 							this.car.powerupArmor();
 						}
@@ -432,7 +455,7 @@ window.onload = function() {
 			this.laserShotsTaken = 0; // how many shots have you taken this powerup?
 
 			this.maxArmorTimer = 10; // how long does the armor powerup last?
-			this.armorTimer = this.maxArmorTimer; // set to 0 to activate armor powerup
+			this.armorTimer = this.maxArmorTimer + .001; // set to 0 to activate armor powerup
 
 			this.addEventListener(Event.ENTER_FRAME, this.updateDogeCarAnimation);
 		},
@@ -458,13 +481,12 @@ window.onload = function() {
 				}
 			}
 
-			if (this.armorTimer < this.maxArmorTimer) {
+			if (this.armorTimer <= this.maxArmorTimer) {
 				// if armor timer is activated, continue running the timer
 				this.armorTimer += evt.elapsed * 0.001;
 			}
-			else if (this.armorTimer > this.armorTimer) {
+			else if (this.armorTimer > this.maxArmorTimer) {
 				// if armor timer reached the end, stop the powerup
-				this.armorTimer = this.maxArmorTimer;
 				this.image = Game.instance.assets['img/dogeCarSheet.png'];
 			}
 		},
@@ -661,6 +683,13 @@ window.onload = function() {
 				this.frame = (this.frame + 1) % this.frames;
 				this.animationDuration -= this.animationTimeIncrement;
 			}
+		}
+	});
+
+	var Smoke = Class.create(StationaryObject, {
+		initialize: function(xpos, ypos) {			
+			// Call superclass constructor
+			StationaryObject.call(this, 70, 70, 'img/smokeSheet.png', xpos, ypos, 3); 
 		}
 	});
 
