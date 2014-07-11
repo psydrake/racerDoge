@@ -197,7 +197,7 @@ window.onload = function() {
 					snd['bgm'].play();
 				}
 				else { // cordova
-					snd['bgm'].play({numberOfLoops:"infinite"});
+					snd['bgm'].play({numberOfLoops:-1});
 				}
 			}
 		},
