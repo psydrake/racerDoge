@@ -476,8 +476,7 @@ window.onload = function() {
 							this.addChild(this.createLabel('armor powerup!', 'green', Game.instance.width / 3, coin.y - 400));
 							break;
 						case 'pandacoin':
-							this.car.laserTimer = 0;
-							this.car.laserShotsTaken = 0; // reset shots taken
+							this.car.powerupLaser();
 							this.addChild(this.createLabel('laser powerup!', 'red', Game.instance.width / 3, coin.y - 400));
 							break;
 					}
@@ -600,6 +599,11 @@ window.onload = function() {
 		powerupArmor: function() { // start the armor powerup
 			this.image = Game.instance.assets['img/dogeCarPowerupSheet.png'];
 			this.armorTimer = 0; // 0 starts the timer
+		},
+
+		powerupLaser: function() { // start the laser powerup
+			this.laserTimer = 0; // 0 starts the timer
+			this.laserShotsTaken = 0; // reset shots taken
 		},
 
 		move: function(xdir, ydir, increment) {
@@ -836,31 +840,49 @@ window.onload = function() {
 			smartDoge.x = game.width / 2;
 			smartDoge.y = game.height * 2/3;
 
-			// Game Over label
-			var gameOverString = score === 0 ? "Ready to Race?<br/><br/>Tap to Start!" : "GAME OVER<br/><br/>Tap to Restart";
-			var gameOverLabel = new Label(gameOverString);
-			gameOverLabel.x = game.width / 4;
-			gameOverLabel.y = game.height / 2;
-			gameOverLabel.color = 'green';
-			gameOverLabel.font = '32px Comic Sans MS';
-			gameOverLabel.textAlign = 'center';
-
+			// Racer Doge label
+			var titleLabel = new Label('Racer Doge');
+			titleLabel.x = game.width / 4;
+			titleLabel.y = game.height / 6;
+			titleLabel.color = 'red';
+			titleLabel.font = '32px Comic Sans MS';
+			titleLabel.textAlign = 'center';
+			
 			// Score label
 			var scoreLabel = new Label('SCORE<br/><br/>' + score);
-			scoreLabel.x = game.width / 4;
-			scoreLabel.y = game.height / 3;
-			scoreLabel.color = 'pink';
-			scoreLabel.font = '32px Comic Sans MS';
+			scoreLabel.x = game.width / 10;
+			scoreLabel.y = game.height / 4;
+			scoreLabel.color = 'white';
+			scoreLabel.font = '28px Comic Sans MS';
 			scoreLabel.textAlign = 'center';
 
+			// High score label
+			var hiscoreLabel = new Label('HI SCORE<br/><br/>' + score);
+			hiscoreLabel.x = game.width / 2;
+			hiscoreLabel.y = game.height / 4;
+			hiscoreLabel.color = 'pink';
+			hiscoreLabel.font = '28px Comic Sans MS';
+			hiscoreLabel.textAlign = 'center';
+
+			// Game Over label
+			var gameOverString = score === 0 ? "Ready? Tap<br/><br/>To Start!" : "GAME OVER<br/><br/>Tap to Start";
+			var gameOverLabel = new Label(gameOverString);
+			gameOverLabel.x = game.width / 8;
+			gameOverLabel.y = game.height * 3/4;
+			gameOverLabel.color = 'green';
+			gameOverLabel.font = '28px Comic Sans MS';
+			gameOverLabel.textAlign = 'left';
+
+			// add Sprite Doge picture
 			this.addChild(smartDoge);
 
 			// Add labels
-			this.addChild(gameOverLabel);
+			this.addChild(titleLabel);
 			this.addChild(scoreLabel);
+			this.addChild(hiscoreLabel);
+			this.addChild(gameOverLabel);
 
 			// Listen for taps
-			//gameOverLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
 			this.addEventListener(Event.TOUCH_START, this.touchToRestart);
 		},
 
