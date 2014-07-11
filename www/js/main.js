@@ -895,6 +895,15 @@ window.onload = function() {
 			hiScoreLabel.font = '28px Comic Sans MS';
 			hiScoreLabel.textAlign = 'center';
 
+			// Information Text label
+			var infoString = 'by Drake Emko<br/><br/>music by Clayton Meador';
+			var infoLabel = new Label(infoString);
+			infoLabel.x = game.width / 8;
+			infoLabel.y = game.height / 2.25;
+			infoLabel.color = 'cyan';
+			infoLabel.font = '24px Comic Sans MS';
+			infoLabel.textAlign = 'left';
+
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready? Tap<br/><br/>To Start!" : "GAME OVER<br/><br/>Tap to Start";
 			var gameOverLabel = new Label(gameOverString);
@@ -911,6 +920,7 @@ window.onload = function() {
 			this.addChild(titleLabel);
 			this.addChild(scoreLabel);
 			this.addChild(hiScoreLabel);
+			this.addChild(infoLabel);
 			this.addChild(gameOverLabel);
 
 			// Listen for taps
