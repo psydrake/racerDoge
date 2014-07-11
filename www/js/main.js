@@ -219,11 +219,22 @@ window.onload = function() {
 			label.tick = 0;
 			label.addEventListener(Event.ENTER_FRAME, function() {
 				label.tick++;
-				if (label.tick > 80)  {
+				if (label.tick > 60)  {
 					this.parentNode.removeChild(label);
 				}
 			});
 			return label;
+		},
+
+		chooseExclamationText: function(textList, plusScore) {
+			var index = Math.floor(Math.random() * textList.length);
+			var text = textList[index];
+			return  text + (plusScore ? '<br/><br/>+' + plusScore : '');
+		},
+
+		chooseColor: function(colorList) {
+			var index = Math.floor(Math.random() * colorList.length);
+			return colorList[index];
 		},
 
 		setScore: function (value) {
@@ -289,11 +300,13 @@ window.onload = function() {
 						}
 						var smoke = new Smoke(car.x, car.y);
 						this.smokeGroup.addChild(smoke);
+
+						var plusScore = 25;
+						var text = this.chooseExclamationText(['much destruct!', 'very indestruct', 'wow no care!'], plusScore);
+						this.addChild(this.createLabel(text, 'orange', car.x, car.y));
+
+						this.setScore(this.score += plusScore);
 						this.enemyGroup.removeChild(car);
-						
-						this.addChild(this.createLabel('much destruct!', 'orange', car.x, car.y));
-                        
-						this.setScore(this.score += 50);				
 					}
 					else { // if no armor powerup, doge car is destroyed. much sad
 						if (typeof snd['bump'] !== 'undefined') {
@@ -324,14 +337,18 @@ window.onload = function() {
 							var fire = new Fire(car.x + 12, car.y + 10);
 							this.fireGroup.addChild(fire);
 
-							this.addChild(this.createLabel('wow such laser!', 'yellow', car.x, car.y));
-							this.setScore(this.score += 50);
+							var plusScore = 25;
+							var text = this.chooseExclamationText(['wow such laser!', 'so laser!', 'such amaze!'], plusScore);
+							this.addChild(this.createLabel(text, 'yellow', car.x, car.y));
+							this.setScore(this.score += plusScore);
 						}
 						else { // car is already dead - remove car wreck
 							this.smokeGroup.addChild(new Smoke(car.x, car.y));
 
-							this.addChild(this.createLabel('die moar pls', 'pink', car.x, car.y));
-							this.setScore(this.score += 15);
+							var plusScore = 10;
+							var text = this.chooseExclamationText(['die moar pls', 'so begone!'], plusScore);
+							this.addChild(this.createLabel(text, this.chooseColor(['pink', 'orange', 'cyan', 'red']), car.x, car.y));
+							this.setScore(this.score += plusScore);
 
 							this.enemyGroup.removeChild(car);
 						}
@@ -378,11 +395,14 @@ window.onload = function() {
 					this.bombGroup.removeChild(bomb);
 
 					if (this.car.armorTimer < this.car.maxArmorTimer) {
-						// if doge car has armor powerup, enemy is destroyed
+						// if doge car has armor powerup, bomb is destroyed
 						var smoke = new Smoke(bomb.x, bomb.y);
 						this.smokeGroup.addChild(smoke);
 
-						this.setScore(this.score += 15);
+						var plusScore = 10;
+						var text = this.chooseExclamationText(['very bomb', 'such indestruct', 'no scared!'], plusScore);
+						this.addChild(this.createLabel(text, 'blue', bomb.x, bomb.y));
+						this.setScore(this.score += plusScore);
 					}
 					else {
 						this.car.isDead = true;
@@ -406,6 +426,12 @@ window.onload = function() {
 						if (typeof snd['explosion'] !== 'undefined') {
 							snd['explosion'].play();
 						}
+
+						var plusScore = 10;
+						var text = this.chooseExclamationText(['die bomb!', 'such aim', 'so explode!'], plusScore);
+						this.addChild(this.createLabel(text, 'pink', bomb.x, bomb.y));
+						this.setScore(this.score += plusScore);
+
 						this.bombGroup.removeChild(bomb);
 						this.laserGroup.removeChild(laser);
 					}
@@ -430,30 +456,38 @@ window.onload = function() {
 						if (typeof snd['shimmer'] !== 'undefined') {
 							snd['shimmer'].play();
 						}
-						if (coin.name === 'dogecoin') {
-							this.car.powerupArmor();
-						}
 					}
 					else { 
 						if (typeof snd['coin'] !== 'undefined') {
 							snd['coin'].play();
 						}
 					}
-					this.coinGroup.removeChild(coin);
-					var scoreIncr = 10;
+
+					var plusScore = 10;
 					switch (coin.name) {
 						case 'litecoin':
-							scoreIncr = 25;
+							plusScore = 25;
 							break;
 						case 'bitcoin':
-							scoreIncr = 50;
+							plusScore = 50;
+							break;
+						case 'dogecoin':
+							this.car.powerupArmor();
+							this.addChild(this.createLabel('armor powerup!', 'green', Game.instance.width / 3, coin.y - 400));
+							break;
+						case 'pandacoin':
+							this.car.laserTimer = 0;
+							this.car.laserShotsTaken = 0; // reset shots taken
+							this.addChild(this.createLabel('laser powerup!', 'red', Game.instance.width / 3, coin.y - 400));
 							break;
 					}
-					this.setScore(this.score += scoreIncr);
-					if (coin.name === 'pandacoin') { // PND gives you lasers!
-						this.car.laserTimer = 0;
-						this.car.laserShotsTaken = 0; // reset shots taken
-					}
+
+					var coinText = coin.name + (coin.name === 'pandacoin' ? ' pnd' : '');
+					var text = this.chooseExclamationText(['such ' + coinText + '!', 'very ' + coinText, 'wow ' + coinText + '!'], plusScore);
+					this.addChild(this.createLabel(text, this.chooseColor(['pink', 'cyan']), coin.x, coin.y - 100));
+					this.setScore(this.score += plusScore);
+
+					this.coinGroup.removeChild(coin);
 				}
 			}
 
@@ -623,12 +657,16 @@ window.onload = function() {
 			var ySpeed = this.isDead ? carSpeed : 100;
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
-			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
 			if (this.y > game.height) { // enemy car is left behind for good
 				if (typeof snd['pickup'] !== 'undefined') {
 					snd['pickup'].play();
 				}
-				this.parentNode.parentNode.setScore(this.parentNode.parentNode.score += 10);
+
+				var plusScore = 15;
+				var text = this.parentNode.parentNode.chooseExclamationText(['many speed!', 'bye bad car!', 'such fast doge!'], plusScore);
+				this.parentNode.parentNode.addChild(this.parentNode.parentNode.createLabel(text, 'white', this.x - 50, this.parentNode.parentNode.car.y - 300));
+
+				this.parentNode.parentNode.setScore(this.parentNode.parentNode.score += plusScore);
 				this.parentNode.removeChild(this);
 				return;
 			}
