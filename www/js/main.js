@@ -28,6 +28,14 @@ function getPathMedia() {
 };
 
 var snd = {};
+
+// for Android - onStatus Callback for background music
+function onBgmStatus(status) {
+    if (status === Media.MEDIA_STOPPED) {
+        snd['bgm'].play();
+    }
+}
+
 function doCordovaCustomActions() { // called from custom.js: doCustomActions()
 	if (typeof analytics !== "undefined") {
 		analytics.startTrackerWithId('UA-52101670-2');
@@ -41,7 +49,7 @@ function doCordovaCustomActions() { // called from custom.js: doCustomActions()
 		snd['pickup'] = new Media(getPathMedia() + 'snd/170170__timgormly__8-bit-pickup.mp3');
 		snd['laser'] = new Media(getPathMedia() + 'snd/170161__timgormly__8-bit-laser.mp3');
 		snd['shimmer'] = new Media(getPathMedia() + 'snd/170159__timgormly__8-bit-shimmer.mp3');
-		snd['bgm'] = new Media(getPathMedia() + 'snd/RacerDoge.mp3');
+		snd['bgm'] = new Media(getPathMedia() + 'snd/RacerDoge.mp3', onBgmStatus);
 	}
 }
 
@@ -340,7 +348,7 @@ window.onload = function() {
 
 						// Game over
 						if (typeof snd['bgm'] !== 'undefined') {
-						    snd['bgm'].stop();
+						    snd['bgm'].pause();
 						}
 						Game.instance.replaceScene(new SceneGameOver(this.score));
 					    break;
@@ -433,7 +441,7 @@ window.onload = function() {
 
 						// Game over
 						if (typeof snd['bgm'] !== 'undefined') {
-						    snd['bgm'].stop();
+						    snd['bgm'].pause();
 						}
 						Game.instance.replaceScene(new SceneGameOver(this.score));
 					    break;
@@ -898,11 +906,23 @@ window.onload = function() {
 			// Information Text label
 			var infoString = 'by Drake Emko<br/><br/>music by Clayton Meador';
 			var infoLabel = new Label(infoString);
+			infoLabel.textList = [infoString, 'doge sprite: Pavlos8 (pavlos8.deviantart.com)<br/><br/>sound fx: timgormly (www.freesound.org/people/timgormly)']
 			infoLabel.x = game.width / 8;
 			infoLabel.y = game.height / 2.25;
 			infoLabel.color = 'cyan';
-			infoLabel.font = '24px Comic Sans MS';
+			infoLabel.font = '20px Comic Sans MS';
 			infoLabel.textAlign = 'left';
+			infoLabel.tick = 0;
+			infoLabel.tickModulus = 100;
+			infoLabel.addEventListener(Event.ENTER_FRAME, function() {
+				infoLabel.tick++;
+				if (infoLabel.tick % infoLabel.tickModulus === 0)  {
+					infoLabel.text = infoLabel.textList[infoLabel.tick / infoLabel.tickModulus];
+					if (infoLabel.tick >= infoLabel.textList.length * infoLabel.tickModulus) {
+						infoLabel.tick = -1;
+					}
+				}
+			});
 
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready? Tap<br/><br/>To Start!" : "GAME OVER<br/><br/>Tap to Start";
