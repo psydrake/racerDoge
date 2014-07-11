@@ -28,7 +28,7 @@ enchant();
 
 // first get the size from the window
 // if that didn't work, get it from the body
-var screenSize = {
+var windowSize = {
   width: window.innerWidth || document.body.clientWidth,
   height: window.innerHeight || document.body.clientHeight
 }
@@ -39,7 +39,7 @@ var leftBorder = 112;
 var rightBorder = 518;
 var topBorder = 606;
 var bottomBorder = 870;
-var carSpeed = 320; // speed of still objects passing by
+var carSpeed = 310; // speed of still objects passing by
 
 // 2 - On document load 
 window.onload = function() {
@@ -64,12 +64,12 @@ window.onload = function() {
 
 	// 5 - Game settings
 	game.fps = 30;
-	if (screenSize.width > screenWidth && screenSize.height > screenHeight) {
+	if (windowSize.width > screenWidth && windowSize.height > screenHeight) {
 		game.scale = 1;
 	}
 	else {
-		var scale1 = screenSize.width / screenWidth;
-		var scale2 = screenSize.height / screenHeight;
+		var scale1 = windowSize.width / screenWidth;
+		var scale2 = windowSize.height / screenHeight;
 		game.scale = (scale1 > scale2 ? scale2 : scale1) * .99;
 	}
 
@@ -338,28 +338,30 @@ window.onload = function() {
 					}
 				}
 
-				// Check if it's time to create a new bomb
-				if (car.name === 'jeep') { // jeeps can drop bombs
-					this.generateBombTimer += evt.elapsed * 0.001;
-					timeBeforeNext = 3 + Math.floor(Math.random() * 3); // increase to make bombs more rare
-					if (this.generateBombTimer >= timeBeforeNext) { 
-						this.generateBombTimer -= timeBeforeNext;
-						var bomb = new Bomb(car.x, car.y + 30);
-						this.bombGroup.addChild(bomb);
-						if (typeof snd['bumper'] !== 'undefined') {
-							snd['bumper'].play();
+				if (!car.isDead) {
+					// Check if it's time to create a new bomb
+					if (car.name === 'jeep') { // jeeps can drop bombs
+						this.generateBombTimer += evt.elapsed * 0.001;
+						timeBeforeNext = 3 + Math.floor(Math.random() * 3); // increase to make bombs more rare
+						if (this.generateBombTimer >= timeBeforeNext) { 
+							this.generateBombTimer -= timeBeforeNext;
+							var bomb = new Bomb(car.x, car.y + 30);
+							this.bombGroup.addChild(bomb);
+							if (typeof snd['bumper'] !== 'undefined') {
+								snd['bumper'].play();
+							}
 						}
-					}
-				} // grey and yellow cars drop litecoin and bitcoin!
-				else if (['grey car', 'yellow car'].indexOf(car.name) >= 0) { 
-					this.generateEnemyCoinTimer += evt.elapsed * 0.001;
-					timeBeforeNext = 5 + Math.floor(Math.random() * 4); // increase to make bombs more rare
-					if (this.generateEnemyCoinTimer >= timeBeforeNext) { 
-						this.generateEnemyCoinTimer -= timeBeforeNext;
-						var coinName = car.name === 'grey car' ? 'litecoin' : 'bitcoin';
-						this.coinGroup.addChild(new Coin(car.x, car.y + 30, coinName));
-						if (typeof snd['powerup'] !== 'undefined') {
-							snd['powerup'].play();
+					} // grey and yellow cars drop litecoin and bitcoin!
+					else if (['grey car', 'yellow car'].indexOf(car.name) >= 0) { 
+						this.generateEnemyCoinTimer += evt.elapsed * 0.001;
+						timeBeforeNext = 5 + Math.floor(Math.random() * 4); // increase to make bombs more rare
+						if (this.generateEnemyCoinTimer >= timeBeforeNext) { 
+							this.generateEnemyCoinTimer -= timeBeforeNext;
+							var coinName = car.name === 'grey car' ? 'litecoin' : 'bitcoin';
+							this.coinGroup.addChild(new Coin(car.x, car.y + 30, coinName));
+							if (typeof snd['powerup'] !== 'undefined') {
+								snd['powerup'].play();
+							}
 						}
 					}
 				}
