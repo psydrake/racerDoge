@@ -1,3 +1,28 @@
+// phonegap / cordova-specific: get path to media files
+function getPathMedia() { 
+    var path = window.location.pathname;
+    var phoneGapPath = path.substring(0, path.lastIndexOf('/') + 1);
+	return phoneGapPath;
+};
+
+var snd = {};
+function doCordovaCustomActions() { // called from custom.js: doCustomActions()
+	if (typeof analytics !== "undefined") {
+		analytics.startTrackerWithId('UA-52101670-2');
+	}
+	if (typeof snd !== 'undefined') { // using android device, so use Phonegap audio system
+		snd['coin'] = new Media(getPathMedia() + 'snd/170147__timgormly__8-bit-coin.mp3');
+		snd['bump'] = new Media(getPathMedia() + 'snd/170141__timgormly__8-bit-bump.mp3');
+		snd['bumper'] = new Media(getPathMedia() + 'snd/170140__timgormly__8-bit-bumper.mp3');
+		snd['explosion'] = new Media(getPathMedia() + 'snd/170144__timgormly__8-bit-explosion2.mp3');
+		snd['powerup'] = new Media(getPathMedia() + 'snd/170155__timgormly__8-bit-powerup1.mp3');
+		snd['pickup'] = new Media(getPathMedia() + 'snd/170170__timgormly__8-bit-pickup.mp3');
+		snd['laser'] = new Media(getPathMedia() + 'snd/170161__timgormly__8-bit-laser.mp3');
+		snd['shimmer'] = new Media(getPathMedia() + 'snd/170159__timgormly__8-bit-shimmer.mp3');
+		snd['bgm'] = new Media(getPathMedia() + 'snd/RacerDoge.mp3');
+	}
+}
+
 // 1 - Start enchant.js
 enchant(); 
 
