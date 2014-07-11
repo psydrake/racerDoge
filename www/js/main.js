@@ -1,3 +1,25 @@
+// store value in local storage
+function setObject(key, value) {
+	if (typeof(Storage) !== "undefined") {
+	    // Code for localStorage/sessionStorage.
+		localStorage.setItem(key, value);
+	} 
+	else {
+		console.warn('Sorry! No Web Storage support');
+	}
+}
+
+// retrieve value from local storage
+function getObject(key) {
+	if (typeof(Storage) !== "undefined") {
+	    // Code for localStorage/sessionStorage.
+		return localStorage.getItem(key);
+	} 
+	else {
+		console.warn('Sorry! No Web Storage support');
+	}
+}
+
 // phonegap / cordova-specific: get path to media files
 function getPathMedia() { 
     var path = window.location.pathname;
@@ -167,7 +189,7 @@ window.onload = function() {
 			this.generateBombTimer = 0;
 			this.scoreTimer = 0;
 			this.score = 0;
-			this.scoreTimeIncrement = .5; // amount of time before score increases
+			this.scoreTimeIncrement = 1; // amount of time before score increases
 
 			// Start Background music
 			if (typeof snd['bgm'] !== 'undefined') {
@@ -831,6 +853,15 @@ window.onload = function() {
 				trackPage('end');
 			}
 
+			var hiScore = getObject('hiScore');
+			if (!hiScore) { // "high score" misspelled, but it's doge talk yo
+				hiScore = 0;
+			}
+			if (score > hiScore) {
+				hiScore = score;
+				setObject('hiScore', hiScore);
+			}
+
 			Scene.apply(this);
 			this.backgroundColor = 'black';
 
@@ -857,12 +888,12 @@ window.onload = function() {
 			scoreLabel.textAlign = 'center';
 
 			// High score label
-			var hiscoreLabel = new Label('HI SCORE<br/><br/>' + score);
-			hiscoreLabel.x = game.width / 2;
-			hiscoreLabel.y = game.height / 4;
-			hiscoreLabel.color = 'pink';
-			hiscoreLabel.font = '28px Comic Sans MS';
-			hiscoreLabel.textAlign = 'center';
+			var hiScoreLabel = new Label('HI SCORE<br/><br/>' + hiScore);
+			hiScoreLabel.x = game.width / 2;
+			hiScoreLabel.y = game.height / 4;
+			hiScoreLabel.color = 'pink';
+			hiScoreLabel.font = '28px Comic Sans MS';
+			hiScoreLabel.textAlign = 'center';
 
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready? Tap<br/><br/>To Start!" : "GAME OVER<br/><br/>Tap to Start";
@@ -879,7 +910,7 @@ window.onload = function() {
 			// Add labels
 			this.addChild(titleLabel);
 			this.addChild(scoreLabel);
-			this.addChild(hiscoreLabel);
+			this.addChild(hiScoreLabel);
 			this.addChild(gameOverLabel);
 
 			// Listen for taps
