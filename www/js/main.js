@@ -94,28 +94,6 @@ window.onload = function() {
 
 	var game = new Game(screenWidth, screenHeight);
 
-
-	var doGameOver = function(dogeCar, score) {
-		dogeCar.isDead = true;
-
-		// stop looping any background music
-		if (typeof snd['bgm'] !== 'undefined') {
-		    snd['bgm'].stop();
-		}
-
-		// start death music (oh noes!)
-		setTimeout(function() {
-			if (typeof snd['death'] !== 'undefined') {
-				snd['death'].play();
-			}
-
-			setTimeout(function() {
-				game.replaceScene(new SceneGameOver(score));
-			}, 2500);
-
-		}, 500);
-	}
-
 	// 4 - Preload resources
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogeCarPowerupSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
@@ -318,6 +296,31 @@ window.onload = function() {
 		    this.scoreLabel.text = 'SCORE<br>' + this.score;
 		},
 
+		doGameOver: function() {
+			this.car.isDead = true;
+
+			var game = Game.instance;
+			var text = this.chooseExclamationText(['very crash', 'such dead!', 'much dead...', 'game over wow', 'so scared']);
+			this.addChild(this.createLabel(text, 'red', this.car.x - 20, this.car.y - 250));
+
+			// stop looping any background music
+			if (typeof snd['bgm'] !== 'undefined') {
+				snd['bgm'].stop();
+			}
+
+			// start death music (oh noes!)
+			setTimeout(function() {
+				if (typeof snd['death'] !== 'undefined') {
+					snd['death'].play();
+				}
+
+				setTimeout(function() {
+					game.replaceScene(new SceneGameOver(this.score));
+				}, 2500);
+
+			}, 500);
+		},
+
 		update: function(evt) {
 			// if dogecar is dead, don't bother with anything below
 			if (this.car.isDead) {
@@ -396,7 +399,7 @@ window.onload = function() {
 						//var fire = new Fire(this.car.x, this.car.y);
 						//this.fireGroup.addChild(fire);
 
-						doGameOver(this.car, this.score);
+						this.doGameOver();
 					    break;
 					}
 				}
@@ -484,7 +487,7 @@ window.onload = function() {
 						//var fire = new Fire(this.car.x, this.car.y + 10);
 						//this.fireGroup.addChild(fire);
 
-						doGameOver(this.car, this.score);
+						this.doGameOver();
 					    break;
 					}
 				}
