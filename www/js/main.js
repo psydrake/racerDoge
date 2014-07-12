@@ -611,6 +611,9 @@ window.onload = function() {
 		},
 
 		updateAnimation: function(evt) {
+			if (this.isDead) {
+				return; // no more animation if car is dead
+			}
 			this.animationDuration += evt.elapsed * 0.001;
 			if (this.animationDuration >= this.animationTimeIncrement) {
 				this.frame = (this.frame + 1) % 2; // which vehicle frame to show from image sheet
