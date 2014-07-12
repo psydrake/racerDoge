@@ -94,6 +94,28 @@ window.onload = function() {
 
 	var game = new Game(screenWidth, screenHeight);
 
+
+	var doGameOver = function(dogeCar, score) {
+		dogeCar.isDead = true;
+
+		// stop looping any background music
+		if (typeof snd['bgm'] !== 'undefined') {
+		    snd['bgm'].stop();
+		}
+
+		// start death music (oh noes!)
+		setTimeout(function() {
+			if (typeof snd['death'] !== 'undefined') {
+				snd['death'].play();
+			}
+
+			setTimeout(function() {
+				game.replaceScene(new SceneGameOver(score));
+			}, 2500);
+
+		}, 500);
+	}
+
 	// 4 - Preload resources
 	game.preload('img/gameBg.png', 'img/dogeCarSheet.png', 'img/dogeCarPowerupSheet.png', 'img/dogecoin64.png', 'img/pandacoin64.png',
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
@@ -139,7 +161,7 @@ window.onload = function() {
 			}
 		}
 
-		// stop looping any background music
+		// goto intro screen
 		var scene = new SceneGameOver(0);
 		game.pushScene(scene);
 	}
@@ -237,6 +259,10 @@ window.onload = function() {
 
 		// user drags car
 		handleTouchMove: function(evt) {
+			if (this.car.isDead) {
+				return;
+			}
+
 			//console.log('MOVE');
 			var xdir = 0;
 			if (evt.x < this.car.x - 5) {
@@ -293,6 +319,11 @@ window.onload = function() {
 		},
 
 		update: function(evt) {
+			// if dogecar is dead, don't bother with anything below
+			if (this.car.isDead) {
+				return;
+			}
+
 			// Score increase as time passes
 			this.scoreTimer += evt.elapsed * 0.001;
 			if (this.scoreTimer >= this.scoreTimeIncrement) {
@@ -362,16 +393,10 @@ window.onload = function() {
 						if (typeof snd['bump'] !== 'undefined') {
 							snd['bump'].play();
 						}
-						this.car.isDead = true;
 						//var fire = new Fire(this.car.x, this.car.y);
 						//this.fireGroup.addChild(fire);
 
-						// Game over
-						// stop looping any background music
-						if (typeof snd['bgm'] !== 'undefined') {
-						    snd['bgm'].stop();
-						}
-						Game.instance.replaceScene(new SceneGameOver(this.score));
+						doGameOver(this.car, this.score);
 					    break;
 					}
 				}
@@ -456,16 +481,10 @@ window.onload = function() {
 						this.setScore(this.score += plusScore);
 					}
 					else {
-						this.car.isDead = true;
 						//var fire = new Fire(this.car.x, this.car.y + 10);
 						//this.fireGroup.addChild(fire);
 
-						// Game over
-						// stop looping any background music
-						if (typeof snd['bgm'] !== 'undefined') {
-						    snd['bgm'].stop();
-						}
-						Game.instance.replaceScene(new SceneGameOver(this.score));
+						doGameOver(this.car, this.score);
 					    break;
 					}
 				}
@@ -708,7 +727,11 @@ window.onload = function() {
 			this.lane = lane;
 		},
 
-		update: function(evt) { 
+		update: function(evt) {
+			if (this.parentNode.parentNode.car.isDead) {
+				return;
+			}
+
 			var game = Game.instance;
 			var ySpeed = this.isDead ? carSpeed : 100;
 			
@@ -779,6 +802,10 @@ window.onload = function() {
 		},
 
 		update: function(evt) { 
+			if (this.parentNode.parentNode.car.isDead) {
+				return;
+			}
+
 			var ySpeed = carSpeed;
 			
 			this.y -= ySpeed * evt.elapsed * 0.001;
@@ -807,7 +834,11 @@ window.onload = function() {
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 		},
 
-		update: function(evt) { 
+		update: function(evt) {
+			if (this.parentNode.parentNode.car.isDead) {
+				return;
+			}
+
 			var game = Game.instance;
 			var ySpeed = carSpeed;
 			
