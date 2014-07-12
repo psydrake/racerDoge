@@ -49,7 +49,9 @@ function doCordovaCustomActions() { // called from custom.js: doCustomActions()
 		snd['pickup'] = new Media(getPathMedia() + 'snd/170170__timgormly__8-bit-pickup.mp3');
 		snd['laser'] = new Media(getPathMedia() + 'snd/170161__timgormly__8-bit-laser.mp3');
 		snd['shimmer'] = new Media(getPathMedia() + 'snd/170159__timgormly__8-bit-shimmer.mp3');
+		snd['intro'] = new Media(getPathMedia() + 'snd/RacerDogeIntro.mp3', onBgmStatus);
 		snd['bgm'] = new Media(getPathMedia() + 'snd/RacerDoge.mp3', onBgmStatus);
+		snd['death'] = new Media(getPathMedia() + 'snd/deathDogeMusic.mp3', onBgmStatus);
 	}
 }
 
@@ -89,7 +91,8 @@ window.onload = function() {
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
 				'snd/170140__timgormly__8-bit-bumper.mp3', 'snd/170144__timgormly__8-bit-explosion2.mp3', 
 				'snd/170155__timgormly__8-bit-powerup1.mp3', 'snd/170170__timgormly__8-bit-pickup.mp3', 
-				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/170159__timgormly__8-bit-shimmer.mp3', 'snd/RacerDoge.mp3');
+				'snd/170161__timgormly__8-bit-laser.mp3', 'snd/170159__timgormly__8-bit-shimmer.mp3', 
+				'snd/RacerDoge.mp3', 'snd/RacerDogeIntro.mp3', 'snd/deathDogeMusic.mp3');
 	}
 
 	// 5 - Game settings
@@ -138,7 +141,7 @@ window.onload = function() {
 			var game = Game.instance;
 			// 3 - Create child nodes
 			// Label
-			var label = new Label('SCORE<br/>0');
+			var label = new Label('SCORE<br>0');
 			label.x = 9;
 			label.y = 32;        
 			label.color = 'white';
@@ -259,7 +262,7 @@ window.onload = function() {
 		chooseExclamationText: function(textList, plusScore) {
 			var index = Math.floor(Math.random() * textList.length);
 			var text = textList[index];
-			return  text + (plusScore ? '<br/><br/>+' + plusScore : '');
+			return  text + (plusScore ? '<br><br>+' + plusScore : '');
 		},
 
 		chooseColor: function(colorList) {
@@ -269,7 +272,7 @@ window.onload = function() {
 
 		setScore: function (value) {
 		    this.score = value;
-		    this.scoreLabel.text = 'SCORE<br/>' + this.score;
+		    this.scoreLabel.text = 'SCORE<br>' + this.score;
 		},
 
 		update: function(evt) {
@@ -882,13 +885,13 @@ window.onload = function() {
 			// Racer Doge label
 			var titleLabel = new Label('Racer Doge');
 			titleLabel.x = game.width / 4;
-			titleLabel.y = game.height / 6;
+			titleLabel.y = game.height / 8;
 			titleLabel.color = 'red';
 			titleLabel.font = '32px Comic Sans MS';
 			titleLabel.textAlign = 'center';
 			
 			// Score label
-			var scoreLabel = new Label('SCORE<br/><br/>' + score);
+			var scoreLabel = new Label('SCORE<br><br>' + score);
 			scoreLabel.x = game.width / 10;
 			scoreLabel.y = game.height / 4;
 			scoreLabel.color = 'white';
@@ -896,7 +899,7 @@ window.onload = function() {
 			scoreLabel.textAlign = 'center';
 
 			// High score label
-			var hiScoreLabel = new Label('HI SCORE<br/><br/>' + hiScore);
+			var hiScoreLabel = new Label('WOW SCORE<br><br>' + hiScore);
 			hiScoreLabel.x = game.width / 2;
 			hiScoreLabel.y = game.height / 4;
 			hiScoreLabel.color = 'pink';
@@ -904,13 +907,19 @@ window.onload = function() {
 			hiScoreLabel.textAlign = 'center';
 
 			// Information Text label
-			var infoString = 'by Drake Emko<br/><br/>music by Clayton Meador';
+			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
 			var infoLabel = new Label(infoString);
-			infoLabel.textList = [infoString, 'doge sprite: Pavlos8 (pavlos8.deviantart.com)<br/><br/>sound fx: timgormly (www.freesound.org/people/timgormly)']
-			infoLabel.x = game.width / 8;
+			infoLabel.textList = [infoString, 
+				'doge sprite: Pavlos8 (pavlos8.deviantart.com)<br><br>sound fx: timgormly (www.freesound.org/people/timgormly)',
+				'car sprites: skorpio (opengameart.org/users/skorpio)<br><br>car sprites: SpriteLand (www.spriteland.com/sprites)',
+				'jeep sprite: yd (opengameart.org/users/yd)<br><br>bomb sprite: digit1024 (opengameart.org/users/digit1024)',
+				'car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)<br><br>doge sprite: cheeyoon? (imgur.com/LKmSv8u)',
+				'laser sprite: Master484 (m484games.ucoz.com)<br><br>fire sprite: XenosNS (opengameart.org/users/xenosns)',
+				'tree sprites: David Gervais (pousse.rapiere.free.fr)<br><br>smoke sprites: MrBeast (opengameart.org/users/mrbeast)']
+			infoLabel.x = game.width / 6;
 			infoLabel.y = game.height / 2.25;
 			infoLabel.color = 'cyan';
-			infoLabel.font = '20px Comic Sans MS';
+			infoLabel.font = '24px Comic Sans MS';
 			infoLabel.textAlign = 'left';
 			infoLabel.tick = 0;
 			infoLabel.tickModulus = 100;
@@ -925,7 +934,7 @@ window.onload = function() {
 			});
 
 			// Game Over label
-			var gameOverString = score === 0 ? "Ready? Tap<br/><br/>To Start!" : "GAME OVER<br/><br/>Tap to Start";
+			var gameOverString = score === 0 ? "Ready? Tap<br><br>To Start!" : "GAME OVER<br><br>Tap to Start";
 			var gameOverLabel = new Label(gameOverString);
 			gameOverLabel.x = game.width / 8;
 			gameOverLabel.y = game.height * 3/4;
