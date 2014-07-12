@@ -296,7 +296,7 @@ window.onload = function() {
 		    this.scoreLabel.text = 'SCORE<br>' + this.score;
 		},
 
-		doGameOver: function() {
+		doGameOver: function(score) {
 			this.car.isDead = true;
 
 			var game = Game.instance;
@@ -315,7 +315,7 @@ window.onload = function() {
 				}
 
 				setTimeout(function() {
-					game.replaceScene(new SceneGameOver(this.score));
+					game.replaceScene(new SceneGameOver(score));
 				}, 2500);
 
 			}, 500);
@@ -399,7 +399,7 @@ window.onload = function() {
 						//var fire = new Fire(this.car.x, this.car.y);
 						//this.fireGroup.addChild(fire);
 
-						this.doGameOver();
+						this.doGameOver(this.score);
 					    break;
 					}
 				}
@@ -487,7 +487,7 @@ window.onload = function() {
 						//var fire = new Fire(this.car.x, this.car.y + 10);
 						//this.fireGroup.addChild(fire);
 
-						this.doGameOver();
+						this.doGameOver(this.score);
 					    break;
 					}
 				}
@@ -979,7 +979,7 @@ window.onload = function() {
 				'doge sprite: Pavlos8 (pavlos8.deviantart.com)<br><br>sound fx: timgormly (www.freesound.org/people/timgormly)',
 				'car sprites: skorpio (opengameart.org/users/skorpio)<br><br>car sprites: SpriteLand (www.spriteland.com/sprites)',
 				'jeep sprite: yd (opengameart.org/users/yd)<br><br>bomb sprite: digit1024 (opengameart.org/users/digit1024)',
-				'car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)<br><br>doge sprite: cheeyoon? (imgur.com/LKmSv8u)',
+				'car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)<br><br>doge sprite: anonymous (imgur.com/LKmSv8u)',
 				'laser sprite: Master484 (m484games.ucoz.com)<br><br>fire sprite: XenosNS (opengameart.org/users/xenosns)',
 				'tree sprites: David Gervais (pousse.rapiere.free.fr)<br><br>smoke sprites: MrBeast (opengameart.org/users/mrbeast)']
 			infoLabel.x = game.width / 6;
