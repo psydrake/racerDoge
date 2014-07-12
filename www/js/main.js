@@ -36,11 +36,18 @@ function onBgmStatus(status) {
     }
 }
 
+// for Android - onStatus Callback for intro music
+function onIntroStatus(status) {
+    if (status === Media.MEDIA_STOPPED) {
+        snd['intro'].play();
+    }
+}
+
 function doCordovaCustomActions() { // called from custom.js: doCustomActions()
 	if (typeof analytics !== "undefined") {
 		analytics.startTrackerWithId('UA-52101670-2');
 	}
-	if (typeof snd !== 'undefined') { // using android device, so use Phonegap audio system
+	if (typeof snd !== 'undefined') { // using mobile device, so use Phonegap audio system
 		snd['coin'] = new Media(getPathMedia() + 'snd/170147__timgormly__8-bit-coin.mp3');
 		snd['bump'] = new Media(getPathMedia() + 'snd/170141__timgormly__8-bit-bump.mp3');
 		snd['bumper'] = new Media(getPathMedia() + 'snd/170140__timgormly__8-bit-bumper.mp3');
@@ -49,9 +56,16 @@ function doCordovaCustomActions() { // called from custom.js: doCustomActions()
 		snd['pickup'] = new Media(getPathMedia() + 'snd/170170__timgormly__8-bit-pickup.mp3');
 		snd['laser'] = new Media(getPathMedia() + 'snd/170161__timgormly__8-bit-laser.mp3');
 		snd['shimmer'] = new Media(getPathMedia() + 'snd/170159__timgormly__8-bit-shimmer.mp3');
-		snd['intro'] = new Media(getPathMedia() + 'snd/RacerDogeIntro.mp3', onBgmStatus);
-		snd['bgm'] = new Media(getPathMedia() + 'snd/RacerDoge.mp3', onBgmStatus);
-		snd['death'] = new Media(getPathMedia() + 'snd/deathDogeMusic.mp3', onBgmStatus);
+		if (typeof isAndroidApp !== 'undefined' && isAndroidApp) {
+			// for android, Medial.play({numberOfLoops:-1}) doesn't work, so we have to loop with callback
+			snd['intro'] = new Media(getPathMedia() + 'snd/RacerDogeIntro.mp3', onIntroStatus);
+			snd['bgm'] = new Media(getPathMedia() + 'snd/RacerDoge.mp3', onBgmStatus);
+		}
+		else {
+			snd['intro'] = new Media(getPathMedia() + 'snd/RacerDogeIntro.mp3');
+			snd['bgm'] = new Media(getPathMedia() + 'snd/RacerDoge.mp3');
+		}
+		snd['death'] = new Media(getPathMedia() + 'snd/deathDogeMusic.mp3');
 	}
 }
 
@@ -119,10 +133,13 @@ window.onload = function() {
 				snd['pickup'] = game.assets['snd/170170__timgormly__8-bit-pickup.mp3']; // player leaves enemy car in the dust
 				snd['laser'] = game.assets['snd/170161__timgormly__8-bit-laser.mp3']; // player shoots laser
 				snd['shimmer'] = game.assets['snd/170159__timgormly__8-bit-shimmer.mp3']; // player picks up PND - laser powerup!
-				snd['bgm'] = game.assets['snd/RacerDoge.mp3']; // player picks up PND - laser powerup!
+				snd['intro'] = game.assets['snd/RacerDogeIntro.mp3']; // intro screen music
+				snd['bgm'] = game.assets['snd/RacerDoge.mp3']; // background music during game
+				snd['death'] = game.assets['snd/deathDogeMusic.mp3']; // player dies, such woe!
 			}
 		}
 
+		// stop looping any background music
 		var scene = new SceneGameOver(0);
 		game.pushScene(scene);
 	}
@@ -134,6 +151,16 @@ window.onload = function() {
 		// The main gameplay scene.     
 		initialize: function() {
 			trackPage('start');
+
+			// start background music
+			if (typeof snd['bgm'] !== 'undefined') {
+				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
+					snd['bgm'].play();
+				}
+				else { // cordova
+					snd['bgm'].play({numberOfLoops:-1});
+				}
+			}
 
 			// 1 - Call superclass constructor
 			Scene.apply(this);
@@ -201,16 +228,6 @@ window.onload = function() {
 			this.scoreTimer = 0;
 			this.score = 0;
 			this.scoreTimeIncrement = 1; // amount of time before score increases
-
-			// Start Background music
-			if (typeof snd['bgm'] !== 'undefined') {
-				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
-					snd['bgm'].play();
-				}
-				else { // cordova
-					snd['bgm'].play({numberOfLoops:-1});
-				}
-			}
 		},
 
 		// user clicks on area of screen
@@ -350,8 +367,9 @@ window.onload = function() {
 						//this.fireGroup.addChild(fire);
 
 						// Game over
+						// stop looping any background music
 						if (typeof snd['bgm'] !== 'undefined') {
-						    snd['bgm'].pause();
+						    snd['bgm'].stop();
 						}
 						Game.instance.replaceScene(new SceneGameOver(this.score));
 					    break;
@@ -443,8 +461,9 @@ window.onload = function() {
 						//this.fireGroup.addChild(fire);
 
 						// Game over
+						// stop looping any background music
 						if (typeof snd['bgm'] !== 'undefined') {
-						    snd['bgm'].pause();
+						    snd['bgm'].stop();
 						}
 						Game.instance.replaceScene(new SceneGameOver(this.score));
 					    break;
@@ -864,6 +883,16 @@ window.onload = function() {
 				trackPage('end');
 			}
 
+			// start intro music
+			if (typeof snd['intro'] !== 'undefined') {
+				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
+					snd['intro'].play();
+				}
+				else { // cordova
+					snd['intro'].play({numberOfLoops:-1});
+				}
+			}
+
 			var hiScore = getObject('hiScore');
 			if (!hiScore) { // "high score" misspelled, but it's doge talk yo
 				hiScore = 0;
@@ -954,11 +983,29 @@ window.onload = function() {
 
 			// Listen for taps
 			this.addEventListener(Event.TOUCH_START, this.touchToRestart);
+	
+			// make sure intro music loops
+			this.addEventListener(Event.ENTER_FRAME, this.update);
 		},
 
 		touchToRestart: function(evt) {
 		    var game = Game.instance;
+
+			// stop looping any background music
+			if (typeof snd['intro'] !== 'undefined') {
+			    snd['intro'].stop();
+			}
 		    game.replaceScene(new SceneGame());
+		},
+
+		update: function(evt) {
+			// Loop intro music
+			if (typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
+				typeof snd['intro'] !== 'undefined') {
+				if (snd['intro'].currentTime >= snd['intro'].duration) {
+					snd['intro'].play();
+				}
+			}
 		}
 	});
 }

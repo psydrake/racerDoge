@@ -13,3 +13,4 @@ function doCustomActions() {
 	doCordovaCustomActions(); // in main.js
 }
 
+var isAndroidApp = true;
