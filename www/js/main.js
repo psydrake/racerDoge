@@ -985,9 +985,10 @@ window.onload = function() {
 
 			// Information Text label
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
+			var donateString = 'Click to donate DOGE<br><br>(such generous)!';
 			var infoLabel = new Label(infoString);
-			infoLabel.textList = [infoString, 
-				'Click to donate DOGE<br><br>(such generous)!',
+			infoLabel.textList = [infoString, infoString,
+				donateString, donateString,
 				'asset credits: such open, many source!<br><br>doge sprite: Pavlos8 (pavlos8.deviantart.com)',
 				'sound fx: timgormly (www.freesound.org/people/timgormly)<br><br>car sprites: skorpio (opengameart.org/users/skorpio)',
 				'car sprites: SpriteLand (www.spriteland.com/sprites)<br><br>jeep sprite: yd (opengameart.org/users/yd)',
@@ -1001,7 +1002,7 @@ window.onload = function() {
 			infoLabel.font = '24px Comic Sans MS';
 			infoLabel.textAlign = 'left';
 			infoLabel.tick = 0;
-			infoLabel.tickModulus = 100;
+			infoLabel.tickModulus = 50;
 			infoLabel.addEventListener(Event.ENTER_FRAME, function() {
 				infoLabel.tick++;
 				if (infoLabel.tick % infoLabel.tickModulus === 0)  {
@@ -1013,10 +1014,10 @@ window.onload = function() {
 			});
 			infoLabel.addEventListener(Event.TOUCH_START, function() {
 				var index = Math.floor(infoLabel.tick / infoLabel.tickModulus);
-				if (index === 1) { // donate link
+				if (index === 2 || index === 3) { // donate link
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#donate')
 				}
-				else if (index === 8) { // learn about DOGE and PND
+				else if (index === 10) { // learn about DOGE and PND
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#learn')
 				}
 				else { // asset credits
