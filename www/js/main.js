@@ -1001,7 +1001,7 @@ window.onload = function() {
 			});
 			infoLabel.addEventListener(Event.TOUCH_START, function() {
 				var index = Math.floor(infoLabel.tick / infoLabel.tickModulus);
-				if (index === 0) {
+				if (index === 1) {
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#donate')
 				}
 			});
