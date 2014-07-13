@@ -206,6 +206,7 @@ window.onload = function() {
 			label.textAlign = 'center';
 			label._style.textShadow ="-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black";
 			this.scoreLabel = label;
+			this.score = 0;
 
 			var bg = new Sprite(screenWidth, screenHeight);
 			bg.image = game.assets['img/gameBg.png'];
@@ -249,23 +250,64 @@ window.onload = function() {
 			this.addEventListener(Event.ENTER_FRAME, this.update);
 
 			// Instance variables
-			this.generateStripeTimer = 0;
-			this.generateSceneryTimer = 0;
-			this.generateCoinTimer = 0;
-			this.generateEnemyTimer = 0;
-			this.generateEnemyCoinTimer = 0;
-			this.generateBombTimer = 0;
-			this.scoreTimer = 0;
-			this.score = 0;
-			this.scoreTimeIncrement = 1; // amount of time before score increases
-
+			this.timedObjects = {
+				stripe: {timer: 0, timeBeforeNext: 0},
+				score: {timer: 0, timeBeforeNext: 0},
+				scenery: {timer: 0, timeBeforeNext: 0},
+				coin: {timer: 0, timeBeforeNext: 0},
+				enemy: {timer: 0, timeBeforeNext: 0},
+				enemyCoin: {timer: 0, timeBeforeNext: 0},
+				bomb: {timer: 0, timeBeforeNext: 0}
+			}
+								
 			// start of race welcome message
 			var welcomeText = this.chooseExclamationText(["It's Race Time!", 'Start Racing!', 'Ready Set Go!']);
 			this.addChild(this.createLabel(welcomeText, this.chooseColor(['yellow', 'pink', 'cyan', 'white', 'green']), game.width / 4, game.height - 400));
 		},
 
+		getTimeBeforeNext: function(type) {
+			// if timeBeforeNext has been generated, return that value
+			if (this.timedObjects[type].timeBeforeNext > 0) {
+				return this.timedObjects[type].timeBeforeNext;
+			}
+			// timeBeforeNext has never been generated yet, let's do it now
+			this.timedObjects[type].timeBeforeNext = this.generateTimeBeforeNext(type);
+			return this.timedObjects[type].timeBeforeNext;
+		},
+
+		generateTimeBeforeNext: function(type) {
+			switch (type) { // item is more rare the higher the returned value
+				case 'stripe':
+					return .7;
+
+				case 'score':
+					return 1;
+
+				case 'scenery':
+					return 5 + Math.floor(Math.random() * 3);
+
+				case 'coin':
+					return 10 + Math.floor(Math.random() * 14);
+
+				case 'enemy':
+					return 8 + Math.floor(Math.random() * 6); 
+
+				case 'enemyCoin':
+					return 5 + Math.floor(Math.random() * 4);
+
+				case 'bomb':
+					return 3 + Math.floor(Math.random() * 3);
+			}
+		},
+
+		// after timed object appears, call this to reset timer and get new timeBeforeNext
+		resetTimedObject: function(type) {
+			this.timedObjects[type].timer = 0; // reset timer
+			this.timedObjects[type].timeBeforeNext = this.generateTimeBeforeNext(type); // create a new timeBeforeNext value
+		},
+
 		// user clicks on area of screen
-		handleTouchStart: function (evt) {
+		handleTouchStart: function(evt) {
 			this.handleTouchMove(evt);
 		},
 
@@ -330,9 +372,31 @@ window.onload = function() {
 			
 		},
 
-		setScore: function (value) {
+		setScore: function(value) {
 		    this.score = value;
 		    this.scoreLabel.text = 'SCORE<br>' + this.score;
+		},
+
+		getRandomEnemy: function() {
+			var carChoice = Math.floor(Math.random() * 7);
+			switch (carChoice) {
+				case 0:
+				case 1:
+					return new NPCVehicle('green car', Math.floor(Math.random()*3), 'img/greenCarSheet.png', 60, 126, 6);
+
+				case 2:
+				case 3:
+					return new NPCVehicle('blue car', Math.floor(Math.random()*3), 'img/blueCarSheet.png', 60, 126, 6);
+
+				case 4:
+					return new NPCVehicle('yellow car', Math.floor(Math.random()*3), 'img/yellowCarSheet.png', 76, 120, 8);
+
+				case 5:
+					return new NPCVehicle('grey car', Math.floor(Math.random()*3), 'img/greyCarSheet.png', 77, 120, 8);
+
+				default:
+					return new NPCVehicle('jeep', Math.floor(Math.random()*3), 'img/jeepSheet.png', 76, 105, 9);
+			}
 		},
 
 		doGameOver: function(score) {
@@ -363,49 +427,27 @@ window.onload = function() {
 				return;
 			}
 
+			var elapsedTime = evt.elapsed * 0.001;
+
 			// Score increase as time passes
-			this.scoreTimer += evt.elapsed * 0.001;
-			if (this.scoreTimer >= this.scoreTimeIncrement) {
+			this.timedObjects['score'].timer += elapsedTime;
+			if (this.timedObjects['score'].timer >= this.getTimeBeforeNext('score')) {
 				this.setScore(this.score + 1);
-				this.scoreTimer -= this.scoreTimeIncrement;
+				this.resetTimedObject('score');
 			}
 
 			// Check if it's time to create a new lane stripe
-			this.generateStripeTimer += evt.elapsed * 0.001;
-			var  timeBeforeNext = .7; // increase to make enemy cars more rare
-			if (this.generateStripeTimer >= timeBeforeNext) { 
-				this.generateStripeTimer -= timeBeforeNext;
+			this.timedObjects['stripe'].timer += elapsedTime;
+			if (this.timedObjects['stripe'].timer >= this.getTimeBeforeNext('stripe')) { 
 				this.stripeGroup.addChild(new Stripe());
+				this.resetTimedObject('stripe');
 			}
 
 			// Check if it's time to create a new set of obstacles
-			this.generateEnemyTimer += evt.elapsed * 0.001;
-			timeBeforeNext = 8 + Math.floor(Math.random() * 6); // increase to make enemy cars more rare
-			if (this.generateEnemyTimer >= timeBeforeNext) { 
-				this.generateEnemyTimer -= timeBeforeNext;
-
-				var car = null;
-				var carChoice = Math.floor(Math.random() * 7);
-				switch (carChoice) {
-					case 0:
-					case 1:
-						car = new NPCVehicle('green car', Math.floor(Math.random()*3), 'img/greenCarSheet.png', 60, 126, 6);
-						break;
-					case 2:
-					case 3:
-						car = new NPCVehicle('blue car', Math.floor(Math.random()*3), 'img/blueCarSheet.png', 60, 126, 6);
-						break;
-					case 4:
-						car = new NPCVehicle('yellow car', Math.floor(Math.random()*3), 'img/yellowCarSheet.png', 76, 120, 8);
-						break;
-					case 5:
-						car = new NPCVehicle('grey car', Math.floor(Math.random()*3), 'img/greyCarSheet.png', 77, 120, 8);
-						break;
-					default:
-						car = new NPCVehicle('jeep', Math.floor(Math.random()*3), 'img/jeepSheet.png', 76, 105, 9);
-
-				}
-				this.enemyGroup.addChild(car);
+			this.timedObjects['enemy'].timer += elapsedTime;
+			if (this.timedObjects['enemy'].timer >= this.getTimeBeforeNext('enemy')) { 
+				this.enemyGroup.addChild(this.getRandomEnemy());
+				this.resetTimedObject('enemy');
 			}
 
 			// Check enemy car collision
@@ -471,34 +513,35 @@ window.onload = function() {
 				if (!car.isDead) {
 					// Check if it's time to create a new bomb
 					if (car.name === 'jeep') { // jeeps can drop bombs
-						this.generateBombTimer += evt.elapsed * 0.001;
-						timeBeforeNext = 3 + Math.floor(Math.random() * 3); // increase to make bombs more rare
-						if (this.generateBombTimer >= timeBeforeNext) { 
-							this.generateBombTimer -= timeBeforeNext;
-							var bomb = new Bomb(car.x, car.y + 30);
-							this.bombGroup.addChild(bomb);
+						this.timedObjects['bomb'].timer += elapsedTime;
+
+						if (this.timedObjects['bomb'].timer >= this.getTimeBeforeNext('bomb')) {
 							if (typeof snd['bumper'] !== 'undefined') {
 								snd['bumper'].play();
 							}
+
+							this.bombGroup.addChild(new Bomb(car.x, car.y + 30));
+							this.resetTimedObject('bomb');
 						}
 					} // grey and yellow cars drop litecoin and bitcoin!
 					else if (['grey car', 'yellow car'].indexOf(car.name) >= 0) { 
-						this.generateEnemyCoinTimer += evt.elapsed * 0.001;
-						timeBeforeNext = 5 + Math.floor(Math.random() * 4); // increase to make bombs more rare
-						if (this.generateEnemyCoinTimer >= timeBeforeNext) { 
-							this.generateEnemyCoinTimer -= timeBeforeNext;
-							var coinName = car.name === 'grey car' ? 'litecoin' : 'bitcoin';
-							this.coinGroup.addChild(new Coin(car.x, car.y + 30, coinName));
+						this.timedObjects['enemyCoin'].timer += elapsedTime;
+
+						if (this.timedObjects['enemyCoin'].timer >= this.getTimeBeforeNext('enemyCoin')) {
 							if (typeof snd['powerup'] !== 'undefined') {
 								snd['powerup'].play();
 							}
+
+							var coinName = car.name === 'grey car' ? 'litecoin' : 'bitcoin';
+							this.coinGroup.addChild(new Coin(car.x, car.y + 30, coinName));
+							this.resetTimedObject('enemyCoin');
 						}
 					}
 				}
 			}
 
 			// Check bomb collision
-			for (var i = this.bombGroup.childNodes.length - 1; i >= 0; i--) {
+			for (var i = 0; i < this.bombGroup.childNodes.length; i++) {
 				var bomb = this.bombGroup.childNodes[i];
 
 				if (bomb.intersect(this.car)) { // player car gets hit by bomb!
@@ -518,9 +561,6 @@ window.onload = function() {
 						this.setScore(this.score += plusScore);
 					}
 					else {
-						//var fire = new Fire(this.car.x, this.car.y + 10);
-						//this.fireGroup.addChild(fire);
-
 						this.doGameOver(this.score);
 					    break;
 					}
@@ -547,14 +587,15 @@ window.onload = function() {
 			}
 
 			// Check if it's time to create a new set of coins
-			this.generateCoinTimer += evt.elapsed * 0.001;
-			timeBeforeNext = 10 + Math.floor(Math.random() * 14); // increase to make coins more rare
-			if (this.generateCoinTimer >= timeBeforeNext) { 
-				this.generateCoinTimer -= timeBeforeNext;
+			this.timedObjects['coin'].timer += elapsedTime;
+			if (this.timedObjects['coin'].timer >= this.getTimeBeforeNext('coin')) {
 				var xpos = leftBorder + 10 + Math.floor(Math.random() * (rightBorder - leftBorder - 10));
+
 				var coin = Math.floor(Math.random() * 2) === 0 ? new Coin(xpos, null, 'pandacoin') : new Coin(xpos, null, 'dogecoin');
 				this.coinGroup.addChild(coin);
+				this.resetTimedObject('coin');
 			}
+
 			// Check collision
 			for (var i = 0; i < this.coinGroup.childNodes.length; i++) {
 				var coin = this.coinGroup.childNodes[i];
@@ -599,13 +640,13 @@ window.onload = function() {
 			}
 
 			// Check if it's time to create a new set of scenery
-			this.generateSceneryTimer += evt.elapsed * 0.001;
-			timeBeforeNext = 5 + Math.floor(Math.random() * 3); // increase to make scenery more rare
-			if (this.generateSceneryTimer >= timeBeforeNext) { 
-				this.generateSceneryTimer -= timeBeforeNext;
-
+			this.timedObjects['scenery'].timer += elapsedTime;
+			if (this.timedObjects['scenery'].timer >= this.getTimeBeforeNext('scenery')) {
 				var scenery = Math.floor(Math.random() * 2) === 0 ? new Scenery('img/summerTree60.png') : new Scenery('img/summerPineTree60.png');
+
 				this.sceneryGroup.addChild(scenery);
+				this.resetTimedObject('scenery');
+
 				firstSceneryMoment = false;
 			}
 
@@ -662,10 +703,10 @@ window.onload = function() {
 
 			this.laserTimeIncrement = 1; // how many seconds between shots
 			this.laserTimer = this.laserTimeIncrement + .001; // set to 0 to activate lasers
-			this.maxLaserShots = 10; // how many shots you get per powerup
+			this.maxLaserShots = 9; // how many shots you get per powerup
 			this.laserShotsTaken = 0; // how many shots have you taken this powerup?
 
-			this.maxArmorTimer = 10; // how long does the armor powerup last?
+			this.maxArmorTimer = 8; // how long does the armor powerup last?
 			this.armorTimer = this.maxArmorTimer + .001; // set to 0 to activate armor powerup
 
 			this.addEventListener(Event.ENTER_FRAME, this.updateDogeCarAnimation);
@@ -803,7 +844,6 @@ window.onload = function() {
 			}
 			else if (this.targetLane < this.lane) { // car is moving to a different lane
 				if (this.x <= leftBorder + 10) {
-					//this.targetLane = 0;
 					this.lane = this.targetLane;
 				}
 				else {
@@ -812,7 +852,6 @@ window.onload = function() {
 			}
 			else if (this.targetLane > this.lane) {
 				if (this.x >= rightBorder - 10) {
-					//this.targetLane = 2;
 					this.lane = this.targetLane;
 				}
 				else {
@@ -835,7 +874,6 @@ window.onload = function() {
 			// Call superclass constructor
 			Sprite.apply(this, [11, 39]);
 			this.image  = Game.instance.assets[imgPath];
-			this.rotationSpeed = 0;
 			this.x = xpos;
 			this.y = ypos;
 			this.addEventListener(Event.ENTER_FRAME, this.update);
@@ -847,9 +885,8 @@ window.onload = function() {
 			}
 
 			var ySpeed = carSpeed;
-			
 			this.y -= ySpeed * evt.elapsed * 0.001;
-			//this.rotation += this.rotationSpeed * evt.elapsed * 0.001;           
+
 			if (this.y < 1) {
 				this.parentNode.removeChild(this);
 			}
@@ -1070,7 +1107,7 @@ window.onload = function() {
 			});
 
 			// Game Over label
-			var gameOverString = score === 0 ? "Ready? Tap<br><br>To Start!" : "GAME OVER<br><br>Tap to Start";
+			var gameOverString = score === 0 ? "Tap to Start<br><br>When Ready!" : "GAME OVER<br><br>Tap to Start";
 			var gameOverLabel = new Label(gameOverString);
 			gameOverLabel.x = game.width / 8;
 			gameOverLabel.y = game.height * 3/4;
