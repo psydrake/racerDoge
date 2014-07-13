@@ -28,17 +28,18 @@ function getPathMedia() {
 };
 
 var snd = {};
+var musicOn = true;
 
 // for Android - onStatus Callback for background music
 function onBgmStatus(status) {
-    if (status === Media.MEDIA_STOPPED) {
+    if (musicOn && status === Media.MEDIA_STOPPED) {
         snd['bgm'].play();
     }
 }
 
 // for Android - onStatus Callback for intro music
 function onIntroStatus(status) {
-    if (status === Media.MEDIA_STOPPED) {
+    if (musicOn && status === Media.MEDIA_STOPPED) {
         snd['intro'].play();
     }
 }
@@ -153,7 +154,7 @@ window.onload = function() {
 			trackPage('start');
 
 			// start background music
-			if (typeof snd['bgm'] !== 'undefined') {
+			if (musicOn && typeof snd['bgm'] !== 'undefined') {
 				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
 					snd['bgm'].play();
 				}
@@ -302,13 +303,13 @@ window.onload = function() {
 			this.addChild(this.createLabel(text, 'red', this.car.x - 20, this.car.y - 250));
 
 			// stop looping any background music
-			if (typeof snd['bgm'] !== 'undefined') {
+			if (musicOn && typeof snd['bgm'] !== 'undefined') {
 				snd['bgm'].stop();
 			}
 
 			// start death music (oh noes!)
 			setTimeout(function() {
-				if (typeof snd['death'] !== 'undefined') {
+				if (musicOn && typeof snd['death'] !== 'undefined') {
 					snd['death'].play();
 				}
 
@@ -572,7 +573,7 @@ window.onload = function() {
 			}
 
 			// Loop BGM
-			if (typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
+			if (musicOn && typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
 				typeof snd['bgm'] !== 'undefined') {
 				if (snd['bgm'].currentTime >= snd['bgm'].duration ) {
 					snd['bgm'].play();
@@ -921,7 +922,7 @@ window.onload = function() {
 			}
 
 			// start intro music
-			if (typeof snd['intro'] !== 'undefined') {
+			if (musicOn && typeof snd['intro'] !== 'undefined') {
 				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
 					snd['intro'].play();
 				}
@@ -1009,6 +1010,25 @@ window.onload = function() {
 				}
 			});
 
+			var tunesYesText = 'Tunes: Yes<br><br>';
+			var tunesNoText = 'Tunes: No<br><br>';
+			var musicToggleLabel = new Label(musicOn ? tunesYesText : tunesNoText);
+			musicToggleLabel.x = game.width / 2;
+			musicToggleLabel.y = game.height / 2.25;
+			musicToggleLabel.color = 'yellow';
+			musicToggleLabel.font = '28px Comic Sans MS';
+			musicToggleLabel.textAlign = 'right';
+			musicToggleLabel.addEventListener(Event.TOUCH_START, function() {
+				if (musicOn) {
+					musicToggleLabel.text = tunesNoText;
+					musicOn = false;
+				}
+				else {
+					musicToggleLabel.text = tunesYesText;
+					musicOn = true;
+				}
+			});
+
 			// Game Over label
 			var gameOverString = score === 0 ? "Ready? Tap<br><br>To Start!" : "GAME OVER<br><br>Tap to Start";
 			var gameOverLabel = new Label(gameOverString);
@@ -1026,6 +1046,7 @@ window.onload = function() {
 			this.addChild(scoreLabel);
 			this.addChild(hiScoreLabel);
 			this.addChild(infoLabel);
+			this.addChild(musicToggleLabel);
 			this.addChild(gameOverLabel);
 
 			// Listen for taps
@@ -1040,7 +1061,7 @@ window.onload = function() {
 		    var game = Game.instance;
 
 			// stop looping any background music
-			if (typeof snd['intro'] !== 'undefined') {
+			if (musicOn && typeof snd['intro'] !== 'undefined') {
 			    snd['intro'].stop();
 			}
 		    game.replaceScene(new SceneGame());
@@ -1048,7 +1069,7 @@ window.onload = function() {
 
 		update: function(evt) {
 			// Loop intro music
-			if (typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
+			if (musicOn && typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
 				typeof snd['intro'] !== 'undefined') {
 				if (snd['intro'].currentTime >= snd['intro'].duration) {
 					snd['intro'].play();
