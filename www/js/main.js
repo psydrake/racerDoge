@@ -976,7 +976,7 @@ window.onload = function() {
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
 			var infoLabel = new Label(infoString);
 			infoLabel.textList = [infoString, 
-				'donate (such generous)!<br><br>DOGE: DJtyh3FGb29spCJRxwJPWHiDjnwYHYoabP<br>PND: PN1Dv4yLCpEAU7asbSkXC17ZUYK24cZRTq',
+				'donate (such generous)!<br><br>DOGE: DJtyh3FGb29spCJRxwJPWHiDjnwYHYoabP',
 				'asset credits: such open, many source!<br><br>doge sprite: Pavlos8 (pavlos8.deviantart.com)',
 				'sound fx: timgormly (www.freesound.org/people/timgormly)<br><br>car sprites: skorpio (opengameart.org/users/skorpio)',
 				'car sprites: SpriteLand (www.spriteland.com/sprites)<br><br>jeep sprite: yd (opengameart.org/users/yd)',
