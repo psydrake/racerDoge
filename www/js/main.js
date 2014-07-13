@@ -1026,7 +1026,11 @@ window.onload = function() {
 			titleLabel.textAlign = 'center';
 			
 			// Score label
-			var scoreLabel = new Label('SCORE<br><br>' + score);
+			var scoreText = 'SCORE<br><br>' + score;
+			if (score > 0 && score === wowScore) {
+				scoreText += ' <- wow!'
+			}
+			var scoreLabel = new Label(scoreText);
 			scoreLabel.x = game.width / 10;
 			scoreLabel.y = game.height / 4;
 			scoreLabel.color = 'white';
@@ -1107,7 +1111,7 @@ window.onload = function() {
 			});
 
 			// Game Over label
-			var gameOverString = score === 0 ? "Tap to Start<br><br>When Ready!" : "GAME OVER<br><br>Tap to Start";
+			var gameOverString = "Tap to Start<br><br>" + (score === 0 ? "When Ready!" : "GAME OVER");
 			var gameOverLabel = new Label(gameOverString);
 			gameOverLabel.x = game.width / 8;
 			gameOverLabel.y = game.height * 3/4;
