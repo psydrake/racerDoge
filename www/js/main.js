@@ -134,8 +134,7 @@ window.onload = function() {
 		game.scale = (scale1 > scale2 ? scale2 : scale1) * .99;
 	}
 
-	game.onload = function() {
-		// Once Game finishes loading
+	game.onload = function() { // Once Game finishes loading
 		// load sounds if user is playing in browser - phonegap freezes up if we let android load game.assets for sound
 		if (typeof isWebapp !== 'undefined' && isWebapp) { 
 			if (typeof snd !== 'undefined') { // we are playing game in a browser - use enchant.js sound system
@@ -303,6 +302,13 @@ window.onload = function() {
 			return colorList[index];
 		},
 
+		// return an x position (for exclamation labels) that will fit on screen
+		getSafeXCoord: function(x) { 
+			var maxX = Game.instance.width * 3/5;
+			return (x < maxX) ? x : maxX;
+			
+		},
+
 		setScore: function (value) {
 		    this.score = value;
 		    this.scoreLabel.text = 'SCORE<br>' + this.score;
@@ -313,7 +319,7 @@ window.onload = function() {
 
 			var game = Game.instance;
 			var text = this.chooseExclamationText(['very crash', 'such dead!', 'much dead...', 'game over wow', 'so scared']);
-			this.addChild(this.createLabel(text, 'red', this.car.x - 20, this.car.y - 250));
+			this.addChild(this.createLabel(text, 'red', this.getSafeXCoord(this.car.x - 20), this.car.y - 250));
 
 			stopMusic('bgm'); // stop looping any background music
 
@@ -396,7 +402,7 @@ window.onload = function() {
 
 						var plusScore = 25;
 						var text = this.chooseExclamationText(['much destruct!', 'very indestruct', 'no stress'], plusScore);
-						this.addChild(this.createLabel(text, 'orange', car.x, car.y));
+						this.addChild(this.createLabel(text, 'orange', this.getSafeXCoord(car.x), car.y));
 
 						this.setScore(this.score += plusScore);
 						this.enemyGroup.removeChild(car);
@@ -425,7 +431,7 @@ window.onload = function() {
 
 							var plusScore = 25;
 							var text = this.chooseExclamationText(['wow such laser!', 'so laser!', 'such amaze!'], plusScore);
-							this.addChild(this.createLabel(text, 'yellow', car.x, car.y));
+							this.addChild(this.createLabel(text, 'yellow', this.getSafeXCoord(car.x), car.y));
 							this.setScore(this.score += plusScore);
 						}
 						else { // car is already dead - remove car wreck
@@ -433,7 +439,7 @@ window.onload = function() {
 
 							var plusScore = 10;
 							var text = this.chooseExclamationText(['die moar pls', 'so begone!', 'such shoot!'], plusScore);
-							this.addChild(this.createLabel(text, this.chooseColor(['pink', 'orange', 'cyan', 'red']), car.x, car.y));
+							this.addChild(this.createLabel(text, this.chooseColor(['pink', 'orange', 'cyan', 'red']), this.getSafeXCoord(car.x), car.y));
 							this.setScore(this.score += plusScore);
 
 							this.enemyGroup.removeChild(car);
@@ -487,7 +493,7 @@ window.onload = function() {
 
 						var plusScore = 10;
 						var text = this.chooseExclamationText(['very bomb', 'such indestruct', 'no scared!'], plusScore);
-						this.addChild(this.createLabel(text, 'blue', bomb.x, bomb.y));
+						this.addChild(this.createLabel(text, 'blue', this.getSafeXCoord(bomb.x), bomb.y));
 						this.setScore(this.score += plusScore);
 					}
 					else {
@@ -510,7 +516,7 @@ window.onload = function() {
 
 						var plusScore = 10;
 						var text = this.chooseExclamationText(['die bomb!', 'such aim', 'so explode!'], plusScore);
-						this.addChild(this.createLabel(text, 'pink', bomb.x, bomb.y));
+						this.addChild(this.createLabel(text, 'pink', this.getSafeXCoord(bomb.x), bomb.y));
 						this.setScore(this.score += plusScore);
 
 						this.bombGroup.removeChild(bomb);
@@ -564,7 +570,7 @@ window.onload = function() {
 
 					var coinText = coin.name + (coin.name === 'pandacoin' ? ' pnd' : '');
 					var text = this.chooseExclamationText(['such ' + coinText + '!', 'very ' + coinText, 'wow ' + coinText + '!'], plusScore);
-					this.addChild(this.createLabel(text, this.chooseColor(['pink', 'cyan']), coin.x, coin.y - 100));
+					this.addChild(this.createLabel(text, this.chooseColor(['pink', 'cyan']), this.getSafeXCoord(coin.x), coin.y - 100));
 					this.setScore(this.score += plusScore);
 
 					this.coinGroup.removeChild(coin);
@@ -760,8 +766,9 @@ window.onload = function() {
 				}
 
 				var plusScore = 15;
-				var text = this.parentNode.parentNode.chooseExclamationText(['many speed!', 'very bye!', 'such fast doge!'], plusScore);
-				this.parentNode.parentNode.addChild(this.parentNode.parentNode.createLabel(text, 'white', this.x - 50, this.parentNode.parentNode.car.y - 300));
+				var text = this.parentNode.parentNode.chooseExclamationText(['many speed!', 'very bye!', 'such fast doge!', 'to the moon!'], plusScore);
+				this.parentNode.parentNode.addChild(this.parentNode.parentNode.createLabel(text, 'white', 
+					this.parentNode.parentNode.getSafeXCoord(this.x - 50), this.parentNode.parentNode.car.y - 300));
 
 				this.parentNode.parentNode.setScore(this.parentNode.parentNode.score += plusScore);
 				this.parentNode.removeChild(this);
