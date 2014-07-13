@@ -993,7 +993,8 @@ window.onload = function() {
 				'car sprites: SpriteLand (www.spriteland.com/sprites)<br><br>jeep sprite: yd (opengameart.org/users/yd)',
 				'bomb sprite: digit1024 (opengameart.org/users/digit1024)<br><br>laser sprite: Master484 (m484games.ucoz.com)',
 				'fire sprite: XenosNS (opengameart.org/users/xenosns)<br><br>tree sprites: David Gervais (pousse.rapiere.free.fr)',
-				'smoke sprites: MrBeast (opengameart.org/users/mrbeast)<br><br>car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)'];
+				'smoke sprites: MrBeast (opengameart.org/users/mrbeast)<br><br>car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)',
+				'Click to learn about DOGE and PND<br><br>(so educate!)'];
 			infoLabel.x = game.width / 6;
 			infoLabel.y = game.height / 2.25;
 			infoLabel.color = 'cyan';
@@ -1012,10 +1013,13 @@ window.onload = function() {
 			});
 			infoLabel.addEventListener(Event.TOUCH_START, function() {
 				var index = Math.floor(infoLabel.tick / infoLabel.tickModulus);
-				if (index === 1) {
+				if (index === 1) { // donate link
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#donate')
 				}
-				else {
+				else if (index === 8) { // learn about DOGE and PND
+					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#learn')
+				}
+				else { // asset credits
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#credits')
 				}
 			});
