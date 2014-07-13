@@ -1029,6 +1029,7 @@ window.onload = function() {
 			this.addChild(gameOverLabel);
 
 			// Listen for taps
+			smartDoge.addEventListener(Event.TOUCH_START, this.touchToRestart);
 			gameOverLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
 	
 			// make sure intro music loops
