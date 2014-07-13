@@ -31,18 +31,19 @@ function getPathMedia() {
 
 var snd = {};
 var musicOn = true;
+var fxOn = true;
 
 // for Android - onStatus Callback for background music
 function onBgmStatus(status) {
     if (musicOn && status === Media.MEDIA_STOPPED) {
-        snd['bgm'].play();
+        startMusic('bgm');
     }
 }
 
 // for Android - onStatus Callback for intro music
 function onIntroStatus(status) {
     if (musicOn && status === Media.MEDIA_STOPPED) {
-        snd['intro'].play();
+        startMusic('intro');
     }
 }
 
@@ -457,7 +458,7 @@ window.onload = function() {
 				if (car.intersect(this.car)) { // player car gets hit by enemy car!
 					if (this.car.armorTimer < this.car.maxArmorTimer) {
 						// if doge car has armor powerup, enemy is destroyed
-						if (typeof snd['explosion'] !== 'undefined') {
+						if (fxOn && typeof snd['explosion'] !== 'undefined') {
 							snd['explosion'].play();
 						}
 						var smoke = new Smoke(car.x, car.y);
@@ -471,7 +472,7 @@ window.onload = function() {
 						this.enemyGroup.removeChild(car);
 					}
 					else { // if no armor powerup, doge car is destroyed. much sad
-						if (typeof snd['bump'] !== 'undefined') {
+						if (fxOn && typeof snd['bump'] !== 'undefined') {
 							snd['bump'].play();
 						}
 
@@ -483,7 +484,7 @@ window.onload = function() {
 				for (var j = 0; j < this.laserGroup.childNodes.length; j++) {
 					var laser = this.laserGroup.childNodes[j];
 					if (car.intersect(laser)) { // enemy car is hit by laser
-						if (typeof snd['explosion'] !== 'undefined') {
+						if (fxOn && typeof snd['explosion'] !== 'undefined') {
 							snd['explosion'].play();
 						}
 						this.laserGroup.removeChild(laser);
@@ -516,7 +517,7 @@ window.onload = function() {
 						this.timedObjects['bomb'].timer += elapsedTime;
 
 						if (this.timedObjects['bomb'].timer >= this.getTimeBeforeNext('bomb')) {
-							if (typeof snd['bumper'] !== 'undefined') {
+							if (fxOn && typeof snd['bumper'] !== 'undefined') {
 								snd['bumper'].play();
 							}
 
@@ -528,7 +529,7 @@ window.onload = function() {
 						this.timedObjects['enemyCoin'].timer += elapsedTime;
 
 						if (this.timedObjects['enemyCoin'].timer >= this.getTimeBeforeNext('enemyCoin')) {
-							if (typeof snd['powerup'] !== 'undefined') {
+							if (fxOn && typeof snd['powerup'] !== 'undefined') {
 								snd['powerup'].play();
 							}
 
@@ -545,7 +546,7 @@ window.onload = function() {
 				var bomb = this.bombGroup.childNodes[i];
 
 				if (bomb.intersect(this.car)) { // player car gets hit by bomb!
-					if (typeof snd['explosion'] !== 'undefined') {
+					if (fxOn && typeof snd['explosion'] !== 'undefined') {
 						snd['explosion'].play();
 					}
 					this.bombGroup.removeChild(bomb);
@@ -571,7 +572,7 @@ window.onload = function() {
 					var laser = this.laserGroup.childNodes[j];
 
 					if (bomb.intersect(laser)) { // laser hits a bomb
-						if (typeof snd['explosion'] !== 'undefined') {
+						if (fxOn && typeof snd['explosion'] !== 'undefined') {
 							snd['explosion'].play();
 						}
 
@@ -602,12 +603,12 @@ window.onload = function() {
 
 				if (coin.intersect(this.car)) { // player car picks up coin
 					if (['pandacoin', 'dogecoin'].indexOf(coin.name) >= 0) {
-						if (typeof snd['shimmer'] !== 'undefined') {
+						if (fxOn && typeof snd['shimmer'] !== 'undefined') {
 							snd['shimmer'].play();
 						}
 					}
 					else { 
-						if (typeof snd['coin'] !== 'undefined') {
+						if (fxOn && typeof snd['coin'] !== 'undefined') {
 							snd['coin'].play();
 						}
 					}
@@ -720,7 +721,7 @@ window.onload = function() {
 			if (this.laserTimer < this.laserTimeIncrement && this.laserShotsTaken <= this.maxLaserShots) { 
 				// lasers are activated
 				if (this.laserTimer === 0 && this.laserShotsTaken === 0) {
-					if (typeof snd['laser'] !== 'undefined') {
+					if (fxOn && typeof snd['laser'] !== 'undefined') {
 						snd['laser'].play();
 					}
 				}
@@ -728,7 +729,7 @@ window.onload = function() {
 				if (this.laserTimer >= this.laserTimeIncrement) { // laser time!
 					var laser = new Laser(this.x, this.y - 30);
 					this.parentNode.laserGroup.addChild(laser);
-					if (typeof snd['laser'] !== 'undefined') {
+					if (fxOn && typeof snd['laser'] !== 'undefined') {
 						snd['laser'].play();
 					}
 					this.laserShotsTaken += 1;
@@ -818,7 +819,7 @@ window.onload = function() {
 			
 			this.y += ySpeed * evt.elapsed * 0.001;
 			if (this.y > game.height) { // enemy car is left behind for good
-				if (typeof snd['pickup'] !== 'undefined') {
+				if (fxOn && typeof snd['pickup'] !== 'undefined') {
 					snd['pickup'].play();
 				}
 
@@ -1000,6 +1001,15 @@ window.onload = function() {
 				musicOn = musicOnStored === 'true' ? true : false;
 			}
 
+			var fxOnStored = getObject('fxOn'); // any stored music preference
+			if (typeof fxOnStored === 'undefined' || fxOnStored === null) {
+				fxOn = true;
+				setObject('fxOn', fxOn);
+			}
+			else {
+				fxOn = fxOnStored === 'true' ? true : false;
+			}
+
 			var wowScore = getObject('wowScore'); // high score, for you know, a doge
 			if (!wowScore) { 
 				wowScore = 0;
@@ -1088,13 +1098,13 @@ window.onload = function() {
 				}
 			});
 
-			var tunesYesText = 'Tunes: Yes<br><br>';
-			var tunesNoText = 'Tunes: No<br><br>';
+			var tunesYesText = 'Music: Yes';
+			var tunesNoText = 'Music: No';
 			var musicToggleLabel = new Label(musicOn ? tunesYesText : tunesNoText);
 			musicToggleLabel.x = game.width / 2;
 			musicToggleLabel.y = game.height / 2.25;
 			musicToggleLabel.color = 'yellow';
-			musicToggleLabel.font = '28px Comic Sans MS';
+			musicToggleLabel.font = '24px Comic Sans MS';
 			musicToggleLabel.textAlign = 'right';
 			musicToggleLabel.addEventListener(Event.TOUCH_START, function() {
 				if (musicOn) {
@@ -1108,6 +1118,26 @@ window.onload = function() {
 					startMusic('intro');
 				}
 				setObject('musicOn', musicOn);
+			});
+
+			var fxYesText = 'Sound FX: Yes';
+			var fxNoText = 'Sound FX: No';
+			var fxToggleLabel = new Label(fxOn ? fxYesText : fxNoText);
+			fxToggleLabel.x = game.width / 2;
+			fxToggleLabel.y = game.height / 2; //(game.height / 2.25) + 100;
+			fxToggleLabel.color = 'yellow';
+			fxToggleLabel.font = '24px Comic Sans MS';
+			fxToggleLabel.textAlign = 'right';
+			fxToggleLabel.addEventListener(Event.TOUCH_START, function() {
+				if (fxOn) {
+					fxToggleLabel.text = fxNoText;
+					fxOn = false;
+				}
+				else {
+					fxToggleLabel.text = fxYesText;
+					fxOn = true;
+				}
+				setObject('fxOn', fxOn);
 			});
 
 			// Game Over label
@@ -1133,6 +1163,7 @@ window.onload = function() {
 			this.addChild(wowScoreLabel);
 			this.addChild(infoLabel);
 			this.addChild(musicToggleLabel);
+			this.addChild(fxToggleLabel);
 			this.addChild(gameOverLabel);
 
 			// Listen for taps
