@@ -250,7 +250,6 @@ window.onload = function() {
 				 xdir = 1;
 			}
 
-			//console.log('evt.y:', evt.y, 'this.car.y:', this.car.y);
 			var ydir = 0;
 			if (evt.y < this.car.y - 5) {
 				ydir = -1;
@@ -259,7 +258,6 @@ window.onload = function() {
 				ydir = 1;
 			}
 
-			//var direction = evt.x < this.car.x ? 0 : 1;
 			this.car.move(xdir, ydir, 2);
 		},
 
@@ -386,7 +384,7 @@ window.onload = function() {
 						this.smokeGroup.addChild(smoke);
 
 						var plusScore = 25;
-						var text = this.chooseExclamationText(['much destruct!', 'very indestruct', 'wow no care!'], plusScore);
+						var text = this.chooseExclamationText(['much destruct!', 'very indestruct', 'no stress'], plusScore);
 						this.addChild(this.createLabel(text, 'orange', car.x, car.y));
 
 						this.setScore(this.score += plusScore);
@@ -396,8 +394,6 @@ window.onload = function() {
 						if (typeof snd['bump'] !== 'undefined') {
 							snd['bump'].play();
 						}
-						//var fire = new Fire(this.car.x, this.car.y);
-						//this.fireGroup.addChild(fire);
 
 						this.doGameOver(this.score);
 					    break;
@@ -425,7 +421,7 @@ window.onload = function() {
 							this.smokeGroup.addChild(new Smoke(car.x, car.y));
 
 							var plusScore = 10;
-							var text = this.chooseExclamationText(['die moar pls', 'so begone!'], plusScore);
+							var text = this.chooseExclamationText(['die moar pls', 'so begone!', 'such shoot!'], plusScore);
 							this.addChild(this.createLabel(text, this.chooseColor(['pink', 'orange', 'cyan', 'red']), car.x, car.y));
 							this.setScore(this.score += plusScore);
 
@@ -753,7 +749,7 @@ window.onload = function() {
 				}
 
 				var plusScore = 15;
-				var text = this.parentNode.parentNode.chooseExclamationText(['many speed!', 'bye bad car!', 'such fast doge!'], plusScore);
+				var text = this.parentNode.parentNode.chooseExclamationText(['many speed!', 'very bye!', 'such fast doge!'], plusScore);
 				this.parentNode.parentNode.addChild(this.parentNode.parentNode.createLabel(text, 'white', this.x - 50, this.parentNode.parentNode.car.y - 300));
 
 				this.parentNode.parentNode.setScore(this.parentNode.parentNode.score += plusScore);
@@ -793,7 +789,6 @@ window.onload = function() {
 				if (Math.floor(Math.random() * (100 / this.crazyConstant)) === 0) {
 					// car wants to move to a different lane
 					this.targetLane = Math.floor(Math.random() * 3);
-					//console.log('changed target lane to:', this.targetLane);
 				}
 			}
 		}
@@ -981,12 +976,12 @@ window.onload = function() {
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
 			var infoLabel = new Label(infoString);
 			infoLabel.textList = [infoString, 
-				'doge sprite: Pavlos8 (pavlos8.deviantart.com)<br><br>sound fx: timgormly (www.freesound.org/people/timgormly)',
-				'car sprites: skorpio (opengameart.org/users/skorpio)<br><br>car sprites: SpriteLand (www.spriteland.com/sprites)',
-				'jeep sprite: yd (opengameart.org/users/yd)<br><br>bomb sprite: digit1024 (opengameart.org/users/digit1024)',
-				'laser sprite: Master484 (m484games.ucoz.com)<br><br>fire sprite: XenosNS (opengameart.org/users/xenosns)',
-				'tree sprites: David Gervais (pousse.rapiere.free.fr)<br><br>smoke sprites: MrBeast (opengameart.org/users/mrbeast)',
-				'car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)<br><br>remember: 1 doge = 1 doge (such maths!)']
+				'asset credits: such open, many source!<br><br>doge sprite: Pavlos8 (pavlos8.deviantart.com)',
+				'sound fx: timgormly (www.freesound.org/people/timgormly)<br><br>car sprites: skorpio (opengameart.org/users/skorpio)',
+				'car sprites: SpriteLand (www.spriteland.com/sprites)<br><br>jeep sprite: yd (opengameart.org/users/yd)',
+				'bomb sprite: digit1024 (opengameart.org/users/digit1024)<br><br>laser sprite: Master484 (m484games.ucoz.com)',
+				'fire sprite: XenosNS (opengameart.org/users/xenosns)<br><br>tree sprites: David Gervais (pousse.rapiere.free.fr)',
+				'smoke sprites: MrBeast (opengameart.org/users/mrbeast)<br><br>car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)'];
 			infoLabel.x = game.width / 6;
 			infoLabel.y = game.height / 2.25;
 			infoLabel.color = 'cyan';
