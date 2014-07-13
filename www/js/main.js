@@ -44,6 +44,19 @@ function onIntroStatus(status) {
     }
 }
 
+function stopMusic(song) {
+	if (typeof snd[song] !== 'undefined') {
+		if (typeof isWebapp !== 'undefined' && isWebapp) { // webapp only
+			if (snd[song].currentTime < snd[song].duration) {
+				snd[song].stop();
+			}
+		}
+		else { // cordova
+			snd[song].stop();
+		}
+	}
+}
+
 function doCordovaCustomActions() { // called from custom.js: doCustomActions()
 	if (typeof analytics !== "undefined") {
 		analytics.startTrackerWithId('UA-52101670-2');
@@ -302,10 +315,7 @@ window.onload = function() {
 			var text = this.chooseExclamationText(['very crash', 'such dead!', 'much dead...', 'game over wow', 'so scared']);
 			this.addChild(this.createLabel(text, 'red', this.car.x - 20, this.car.y - 250));
 
-			// stop looping any background music
-			if (musicOn && typeof snd['bgm'] !== 'undefined') {
-				snd['bgm'].stop();
-			}
+			stopMusic('bgm'); // stop looping any background music
 
 			// start death music (oh noes!)
 			setTimeout(function() {
@@ -977,7 +987,7 @@ window.onload = function() {
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
 			var infoLabel = new Label(infoString);
 			infoLabel.textList = [infoString, 
-				'donate (such generous)!<br><br>DOGE: DJtyh3FGb29spCJRxwJPWHiDjnwYHYoabP',
+				'Click to donate DOGE<br><br>(such generous)!',
 				'asset credits: such open, many source!<br><br>doge sprite: Pavlos8 (pavlos8.deviantart.com)',
 				'sound fx: timgormly (www.freesound.org/people/timgormly)<br><br>car sprites: skorpio (opengameart.org/users/skorpio)',
 				'car sprites: SpriteLand (www.spriteland.com/sprites)<br><br>jeep sprite: yd (opengameart.org/users/yd)',
@@ -1022,6 +1032,7 @@ window.onload = function() {
 				if (musicOn) {
 					musicToggleLabel.text = tunesNoText;
 					musicOn = false;
+					stopMusic('intro');	// turn off intro music
 				}
 				else {
 					musicToggleLabel.text = tunesYesText;
@@ -1063,10 +1074,9 @@ window.onload = function() {
 		touchToRestart: function(evt) {
 		    var game = Game.instance;
 
-			// stop looping any background music
-			if (musicOn && typeof snd['intro'] !== 'undefined') {
-			    snd['intro'].stop();
-			}
+			// stop looping any intro music
+			stopMusic('intro');
+
 		    game.replaceScene(new SceneGame());
 		},
 
