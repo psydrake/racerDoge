@@ -46,7 +46,7 @@ function onIntroStatus(status) {
     }
 }
 
-function stopMusic(song) {
+function stopMusic(song) { // use to stop looped music
 	if (typeof snd[song] !== 'undefined') {
 		if (typeof isWebapp !== 'undefined' && isWebapp) { // webapp only
 			if (snd[song].currentTime < snd[song].duration) {
@@ -55,6 +55,28 @@ function stopMusic(song) {
 		}
 		else { // cordova
 			snd[song].stop();
+		}
+	}
+}
+
+// use to start looped music
+function startMusic(song) {
+	if (musicOn && typeof snd[song] !== 'undefined') {
+		if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
+			snd[song].play();
+		}
+		else { // cordova
+			snd[song].play({numberOfLoops:-1});
+		}
+	}
+}
+
+// called in update methods of scenes that have looping music
+function loopMusicIfNeeded(song) {
+	if (musicOn && typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
+		typeof snd[song] !== 'undefined') {
+		if (snd[song].currentTime >= snd[song].duration) {
+			snd[song].play();
 		}
 	}
 }
@@ -168,14 +190,7 @@ window.onload = function() {
 			trackPage('start');
 
 			// start background music
-			if (musicOn && typeof snd['bgm'] !== 'undefined') {
-				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
-					snd['bgm'].play();
-				}
-				else { // cordova
-					snd['bgm'].play({numberOfLoops:-1});
-				}
-			}
+			startMusic('bgm');
 
 			// 1 - Call superclass constructor
 			Scene.apply(this);
@@ -243,6 +258,10 @@ window.onload = function() {
 			this.scoreTimer = 0;
 			this.score = 0;
 			this.scoreTimeIncrement = 1; // amount of time before score increases
+
+			// start of race welcome message
+			var welcomeText = this.chooseExclamationText(["It's Race Time!", 'Start Racing!', 'Ready Set Go!']);
+			this.addChild(this.createLabel(welcomeText, this.chooseColor(['yellow', 'pink', 'cyan', 'white', 'green']), game.width / 4, game.height - 400));
 		},
 
 		// user clicks on area of screen
@@ -591,12 +610,7 @@ window.onload = function() {
 			}
 
 			// Loop BGM
-			if (musicOn && typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
-				typeof snd['bgm'] !== 'undefined') {
-				if (snd['bgm'].currentTime >= snd['bgm'].duration ) {
-					snd['bgm'].play();
-				}
-			}
+			loopMusicIfNeeded('bgm');
 
 			var game = Game.instance;
 			if (game.input.left && !game.input.right) {
@@ -959,14 +973,7 @@ window.onload = function() {
 			}
 
 			// start intro music
-			if (musicOn && typeof snd['intro'] !== 'undefined') {
-				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
-					snd['intro'].play();
-				}
-				else { // cordova
-					snd['intro'].play({numberOfLoops:-1});
-				}
-			}
+			startMusic('intro');
 
 			Scene.apply(this);
 			this.backgroundColor = 'black';
@@ -1056,6 +1063,7 @@ window.onload = function() {
 				else {
 					musicToggleLabel.text = tunesYesText;
 					musicOn = true;
+					startMusic('intro');
 				}
 				setObject('musicOn', musicOn);
 			});
@@ -1097,21 +1105,12 @@ window.onload = function() {
 		},
 
 		touchToRestart: function(evt) {
-		    var game = Game.instance;
-
 			stopMusic('intro');	// stop looping any intro music
-
-		    game.replaceScene(new SceneGame());
+			Game.instance.replaceScene(new SceneGame());
 		},
 
 		update: function(evt) {
-			// Loop intro music
-			if (musicOn && typeof isWebapp !== 'undefined' && isWebapp && // only need to loop for webapp
-				typeof snd['intro'] !== 'undefined') {
-				if (snd['intro'].currentTime >= snd['intro'].duration) {
-					snd['intro'].play();
-				}
-			}
+			loopMusicIfNeeded('intro');
 		}
 	});
 }
