@@ -1004,6 +1004,9 @@ window.onload = function() {
 				if (index === 1) {
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#donate')
 				}
+				else {
+					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#credits')
+				}
 			});
 
 			// Game Over label
