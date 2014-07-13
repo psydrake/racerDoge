@@ -1,8 +1,10 @@
+var thisAppName = 'racerDoge';
+
 // store value in local storage
 function setObject(key, value) {
 	if (typeof(Storage) !== "undefined") {
 	    // Code for localStorage/sessionStorage.
-		localStorage.setItem(key, value);
+		localStorage.setItem(thisAppName + '.' + key, value);
 	} 
 	else {
 		console.warn('Sorry! No Web Storage support');
@@ -13,7 +15,7 @@ function setObject(key, value) {
 function getObject(key) {
 	if (typeof(Storage) !== "undefined") {
 	    // Code for localStorage/sessionStorage.
-		return localStorage.getItem(key);
+		return localStorage.getItem(thisAppName + '.' + key);
 	} 
 	else {
 		console.warn('Sorry! No Web Storage support');
@@ -938,14 +940,13 @@ window.onload = function() {
 				trackPage('end');
 			}
 
-			// start intro music
-			if (musicOn && typeof snd['intro'] !== 'undefined') {
-				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
-					snd['intro'].play();
-				}
-				else { // cordova
-					snd['intro'].play({numberOfLoops:-1});
-				}
+			var musicOnStored = getObject('musicOn'); // any stored music preference
+			if (typeof musicOnStored === 'undefined' || musicOnStored === null) {
+				musicOn = true;
+				setObject('musicOn', musicOn);
+			}
+			else {
+				musicOn = musicOnStored === 'true' ? true : false;
 			}
 
 			var wowScore = getObject('wowScore'); // high score, for you know, a doge
@@ -957,14 +958,20 @@ window.onload = function() {
 				setObject('wowScore', wowScore);
 			}
 
+			// start intro music
+			if (musicOn && typeof snd['intro'] !== 'undefined') {
+				if (typeof isWebapp !== 'undefined' && isWebapp) { // for browser game
+					snd['intro'].play();
+				}
+				else { // cordova
+					snd['intro'].play({numberOfLoops:-1});
+				}
+			}
+
 			Scene.apply(this);
 			this.backgroundColor = 'black';
 
 			var game = Game.instance;
-			var smartDoge = new Sprite(250, 250);
-			smartDoge.image = game.assets['img/pixelDoge250.png'];
-			smartDoge.x = game.width / 2;
-			smartDoge.y = game.height * 2/3;
 
 			// Racer Doge label
 			var titleLabel = new Label('Racer Doge');
@@ -1050,6 +1057,7 @@ window.onload = function() {
 					musicToggleLabel.text = tunesYesText;
 					musicOn = true;
 				}
+				setObject('musicOn', musicOn);
 			});
 
 			// Game Over label
@@ -1060,6 +1068,11 @@ window.onload = function() {
 			gameOverLabel.color = 'green';
 			gameOverLabel.font = '28px Comic Sans MS';
 			gameOverLabel.textAlign = 'left';
+
+			var smartDoge = new Sprite(250, 250);
+			smartDoge.image = game.assets['img/pixelDoge250.png'];
+			smartDoge.x = game.width / 2;
+			smartDoge.y = game.height * 2/3;
 
 			// add Sprite Doge picture
 			this.addChild(smartDoge);
@@ -1086,8 +1099,7 @@ window.onload = function() {
 		touchToRestart: function(evt) {
 		    var game = Game.instance;
 
-			// stop looping any intro music
-			stopMusic('intro');
+			stopMusic('intro');	// stop looping any intro music
 
 		    game.replaceScene(new SceneGame());
 		},
