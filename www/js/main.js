@@ -1007,6 +1007,7 @@ window.onload = function() {
 			// Information Text label
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
 			var donateString = 'Click to donate DOGE<br><br>(such generous)!';
+			var learnString = 'Click to learn about DOGE and PND<br><br>(so educate!)';
 			var infoLabel = new Label(infoString);
 			infoLabel.textList = [infoString, infoString,
 				donateString, donateString,
@@ -1016,7 +1017,7 @@ window.onload = function() {
 				'bomb sprite: digit1024 (opengameart.org/users/digit1024)<br><br>laser sprite: Master484 (m484games.ucoz.com)',
 				'fire sprite: XenosNS (opengameart.org/users/xenosns)<br><br>tree sprites: David Gervais (pousse.rapiere.free.fr)',
 				'smoke sprites: MrBeast (opengameart.org/users/mrbeast)<br><br>car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)',
-				'Click to learn about DOGE and PND<br><br>(so educate!)'];
+				learnString, learnString];
 			infoLabel.x = game.width / 6;
 			infoLabel.y = game.height / 2.25;
 			infoLabel.color = 'cyan';
@@ -1038,7 +1039,7 @@ window.onload = function() {
 				if (index === 2 || index === 3) { // donate link
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#donate')
 				}
-				else if (index === 10) { // learn about DOGE and PND
+				else if (index === 10 || index === 11) { // learn about DOGE and PND
 					openLink('http://djv2mmq1jocj7.cloudfront.net/support.html#learn')
 				}
 				else { // asset credits
