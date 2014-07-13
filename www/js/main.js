@@ -931,13 +931,13 @@ window.onload = function() {
 				}
 			}
 
-			var hiScore = getObject('hiScore');
-			if (!hiScore) { // "high score" misspelled, but it's doge talk yo
-				hiScore = 0;
+			var wowScore = getObject('wowScore'); // high score, for you know, a doge
+			if (!wowScore) { 
+				wowScore = 0;
 			}
-			if (score > hiScore) {
-				hiScore = score;
-				setObject('hiScore', hiScore);
+			if (score > wowScore) {
+				wowScore = score;
+				setObject('wowScore', wowScore);
 			}
 
 			Scene.apply(this);
@@ -966,12 +966,12 @@ window.onload = function() {
 			scoreLabel.textAlign = 'center';
 
 			// High score label
-			var hiScoreLabel = new Label('WOW SCORE<br><br>' + hiScore);
-			hiScoreLabel.x = game.width / 2;
-			hiScoreLabel.y = game.height / 4;
-			hiScoreLabel.color = 'pink';
-			hiScoreLabel.font = '28px Comic Sans MS';
-			hiScoreLabel.textAlign = 'center';
+			var wowScoreLabel = new Label('WOW SCORE<br><br>' + wowScore);
+			wowScoreLabel.x = game.width / 2;
+			wowScoreLabel.y = game.height / 4;
+			wowScoreLabel.color = 'pink';
+			wowScoreLabel.font = '28px Comic Sans MS';
+			wowScoreLabel.textAlign = 'center';
 
 			// Information Text label
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
@@ -1044,12 +1044,15 @@ window.onload = function() {
 			// Add labels
 			this.addChild(titleLabel);
 			this.addChild(scoreLabel);
-			this.addChild(hiScoreLabel);
+			this.addChild(wowScoreLabel);
 			this.addChild(infoLabel);
 			this.addChild(musicToggleLabel);
 			this.addChild(gameOverLabel);
 
 			// Listen for taps
+			titleLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
+			scoreLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
+			wowScoreLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
 			smartDoge.addEventListener(Event.TOUCH_START, this.touchToRestart);
 			gameOverLabel.addEventListener(Event.TOUCH_START, this.touchToRestart);
 	
