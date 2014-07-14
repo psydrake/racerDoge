@@ -1,7 +1,7 @@
 {
   "version": "1.0.1",
   "name": "Racer Doge",
-  "description": "Race your Doge to the moon!",
+  "description": "Race your car-driving Doge through the dangerous crypto-highway. Such excite!",
   "launch_path": "/main.html",
   "icons": {
     "16": "/img/racerDoge16.png",
