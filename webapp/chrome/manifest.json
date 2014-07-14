@@ -1,6 +1,6 @@
 {
   "name": "Racer Doge",
-  "description": "Race your Doge to the moon!",
+  "description": "Race your car-driving Doge through the dangerous crypto-highway. Such excite!",
   "version": "1.0.1",
   "manifest_version": 2,
   "icons": { "16": "racerDoge16.png", "128": "racerDoge128.png" },
