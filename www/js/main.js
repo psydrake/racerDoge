@@ -1058,16 +1058,16 @@ window.onload = function() {
 			// Information Text label
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
 			var donateString = 'Click to donate DOGE<br><br>(such generous)!';
-			var learnString = 'Click to learn about DOGE and PND<br><br>(so educate!)';
+			var learnString = 'Click to learn about DOGE<br><br>(so educate!)';
 			var infoLabel = new Label(infoString);
 			infoLabel.textList = [infoString, infoString,
 				donateString, donateString,
-				'asset credits: such open, many source!<br><br>doge sprite: Pavlos8 (pavlos8.deviantart.com)',
-				'sound fx: timgormly (www.freesound.org/people/timgormly)<br><br>car sprites: skorpio (opengameart.org/users/skorpio)',
-				'car sprites: SpriteLand (www.spriteland.com/sprites)<br><br>jeep sprite: yd (opengameart.org/users/yd)',
-				'bomb sprite: digit1024 (opengameart.org/users/digit1024)<br><br>laser sprite: Master484 (m484games.ucoz.com)',
-				'fire sprite: XenosNS (opengameart.org/users/xenosns)<br><br>tree sprites: David Gervais (pousse.rapiere.free.fr)',
-				'smoke sprites: MrBeast (opengameart.org/users/mrbeast)<br><br>car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)',
+				'Asset credits: such thank!<br><br>Doge sprite: Pavlos8 (pavlos8.deviantart.com)',
+				'Sound fx: timgormly (www.freesound.org/people/timgormly)<br><br>Car sprites: skorpio (opengameart.org/users/skorpio)',
+				'Car sprites: SpriteLand (www.spriteland.com/sprites)<br><br>Jeep sprite: yd (opengameart.org/users/yd)',
+				'Bomb sprite: digit1024 (opengameart.org/users/digit1024)<br><br>Laser sprite: Master484 (m484games.ucoz.com)',
+				'Fire sprite: XenosNS (opengameart.org/users/xenosns)<br><br>Tree sprites: David Gervais (pousse.rapiere.free.fr)',
+				'Smoke sprites: MrBeast (opengameart.org/users/mrbeast)<br><br>Car sprite: lowpoly (www.my-bestgames.com/lowpoly.html)',
 				learnString, learnString];
 			infoLabel.x = game.width / 6;
 			infoLabel.y = game.height / 2.25;
