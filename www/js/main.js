@@ -1055,10 +1055,13 @@ window.onload = function() {
 			wowScoreLabel.font = '28px Comic Sans MS';
 			wowScoreLabel.textAlign = 'center';
 
+			// firefox marketplace desktop app doesn't seem to allow user to open links
+			var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
 			// Information Text label
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
-			var donateString = 'Click to donate DOGE<br><br>(such generous)!';
-			var learnString = 'Click to learn about DOGE<br><br>(so educate!)';
+			var donateString = isFirefox ? 'DOGE donations (such generous!)<br><br>DJtyh3FGb29spCJRxwJPWHiDjnwYHYoabP' : 'Click to donate DOGE<br><br>(such generous)!';
+			var learnString = isFirefox ? 'Learn about DOGE<br><br>dogecoin.com (so educate!)' : 'Click to learn about DOGE<br><br>(so educate!)';
 			var infoLabel = new Label(infoString);
 			infoLabel.textList = [infoString, infoString,
 				donateString, donateString,
