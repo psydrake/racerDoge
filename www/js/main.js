@@ -1060,7 +1060,7 @@ window.onload = function() {
 
 			// Information Text label
 			var infoString = 'by Drake Emko<br><br>music by Clayton Meador';
-			var donateString = isFirefox ? 'DOGE donations (such generous!)<br><br>bit.ly/1oVmeg3' : 'Click to donate DOGE<br><br>(such generous)!';
+			var donateString = isFirefox ? 'Donate DOGE (such generous!)<br><br>bit.ly/1oVmeg3' : 'Click to donate DOGE<br><br>(such generous)!';
 			var learnString = isFirefox ? 'Learn about DOGE<br><br>dogecoin.com (so educate!)' : 'Click to learn about DOGE<br><br>(so educate!)';
 			var infoLabel = new Label(infoString);
 			infoLabel.textList = [infoString, infoString,
