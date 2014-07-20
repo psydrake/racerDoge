@@ -124,7 +124,7 @@ var leftBorder = 112;
 var rightBorder = 518;
 var topBorder = 606;
 var bottomBorder = 870;
-var carSpeed = 310; // speed of still objects passing by
+var carSpeed = 315; // speed of still objects passing by
 
 // 2 - On document load 
 window.onload = function() {
@@ -138,7 +138,7 @@ window.onload = function() {
 		'img/greenCarSheet.png', 'img/blueCarSheet.png', 'img/greyCarSheet.png', 'img/yellowCarSheet.png', 
 		'img/jeepSheet.png', 'img/summerTree60.png', 'img/summerPineTree60.png', 'img/whiteLaneStripe8x40.png', 'img/smokeSheet.png',
 		'img/bombSheet.png', 'img/laser11x39.png', 'img/fireSheet.png', 'img/bitcoin64.png', 'img/litecoin64.png',
-		'img/pixelDoge250.png', 'img/racerDoge256.png'); 
+		'img/pixelDoge250.png', 'img/racerDoge256.png', 'img/play.png', 'img/pause.png'); 
 
 	if (typeof isWebapp !== 'undefined' && isWebapp) { // only load sounds for browser game - phonegap freezes up otherwise
 		game.preload('snd/170147__timgormly__8-bit-coin.mp3', 'snd/170141__timgormly__8-bit-bump.mp3', 
@@ -198,16 +198,47 @@ window.onload = function() {
 			// 2 - Access to the game singleton instance
 			var game = Game.instance;
 			// 3 - Create child nodes
-			// Label
-			var label = new Label('SCORE<br>0');
-			label.x = 9;
-			label.y = 32;        
-			label.color = 'white';
-			label.font = '32px Comic Sans MS';
-			label.textAlign = 'center';
-			label._style.textShadow ="-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black";
-			this.scoreLabel = label;
+
 			this.score = 0;
+
+			// Label
+			var scoreLabel = new Label('SCORE<br>' + this.score);
+			scoreLabel.x = 9;
+			scoreLabel.y = 32;        
+			scoreLabel.color = 'white';
+			scoreLabel.font = '32px Comic Sans MS';
+			scoreLabel.textAlign = 'center';
+			scoreLabel._style.textShadow ="-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black";
+			this.scoreLabel = scoreLabel;
+
+			this.STATE_PAUSE = 0;
+			this.STATE_PLAY = 1;
+			this.playState = this.STATE_PLAY;
+
+			var PauseButton = Class.create(Sprite, {
+				initialize: function() {
+					Sprite.apply(this, [32, 32]);
+					this.image = Game.instance.assets['img/pause.png'];
+					this.x = game.width * 3.75/5;
+					this.y = 38;
+					this.rotationSpeed = 0;
+					this.addEventListener(Event.TOUCH_START, this.togglePause);
+				},
+	
+				togglePause: function(evt) {
+					if (this.parentNode.playState === this.parentNode.STATE_PLAY) { // pause it
+						this.parentNode.playState = this.parentNode.STATE_PAUSE;
+						this.image = Game.instance.assets['img/play.png'];
+						stopMusic('bgm'); // stop looping any background music
+					}
+					else { // play from paused state
+						this.parentNode.playState = this.parentNode.STATE_PLAY;
+						this.image = Game.instance.assets['img/pause.png'];
+						startMusic('bgm'); // start looping any background music
+					}
+				}
+			});
+			var pauseButton = new PauseButton();	
 
 			var bg = new Sprite(screenWidth, screenHeight);
 			bg.image = game.assets['img/gameBg.png'];
@@ -240,7 +271,8 @@ window.onload = function() {
 			this.addChild(this.smokeGroup);
 			this.addChild(this.fireGroup);
 			this.addChild(car);
-			this.addChild(label);
+			this.addChild(scoreLabel);
+			this.addChild(pauseButton);
 
 			// Touch listener
 			this.addEventListener(Event.TOUCH_MOVE, this.handleTouchMove);
@@ -314,7 +346,7 @@ window.onload = function() {
 
 		// user drags car
 		handleTouchMove: function(evt) {
-			if (this.car.isDead) {
+			if (this.car.isDead || this.playState === this.STATE_PAUSE) {
 				return;
 			}
 
@@ -424,7 +456,7 @@ window.onload = function() {
 
 		update: function(evt) {
 			// if dogecar is dead, don't bother with anything below
-			if (this.car.isDead) {
+			if (this.car.isDead || this.playState === this.STATE_PAUSE) {
 				return;
 			}
 
@@ -685,7 +717,7 @@ window.onload = function() {
 		},
 
 		updateAnimation: function(evt) {
-			if (this.isDead) {
+			if (this.isDead || (this.parentNode && this.parentNode.playState === this.parentNode.STATE_PAUSE)) {
 				return; // no more animation if car is dead
 			}
 			this.animationDuration += evt.elapsed * 0.001;
@@ -714,7 +746,7 @@ window.onload = function() {
 		},
 
 		updateDogeCarAnimation: function(evt) {
-			if (this.isDead) {
+			if (this.isDead || this.parentNode.playState === this.parentNode.STATE_PAUSE) {
 				return;
 			}
 
@@ -810,7 +842,7 @@ window.onload = function() {
 		},
 
 		update: function(evt) {
-			if (this.parentNode.parentNode.car.isDead) {
+			if (this.parentNode.parentNode.car.isDead || this.parentNode.parentNode.playState === this.parentNode.parentNode.STATE_PAUSE) {
 				return;
 			}
 
@@ -834,7 +866,7 @@ window.onload = function() {
 			}
 
 			// NPC car can move left and right as well
-			if (this.isDead) {
+			if (this.isDead || this.parentNode.parentNode.playState === this.parentNode.parentNode.STATE_PAUSE) {
 				return; // no need to calculate x position
 			}
 
@@ -881,7 +913,7 @@ window.onload = function() {
 		},
 
 		update: function(evt) { 
-			if (this.parentNode.parentNode.car.isDead) {
+			if (this.parentNode.parentNode.car.isDead || this.parentNode.parentNode.playState === this.parentNode.parentNode.STATE_PAUSE) {
 				return;
 			}
 
@@ -913,7 +945,7 @@ window.onload = function() {
 		},
 
 		update: function(evt) {
-			if (this.parentNode.parentNode.car.isDead) {
+			if (this.parentNode.parentNode.car.isDead || this.parentNode.parentNode.playState === this.parentNode.parentNode.STATE_PAUSE) {
 				return;
 			}
 
