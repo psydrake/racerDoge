@@ -238,7 +238,9 @@ window.onload = function() {
 					}
 				}
 			});
-			var pauseButton = new PauseButton();	
+			this.pauseButton = new PauseButton();
+			//game.keybind(32, 'a'); // bind spacebar to "A" button - which will be pause
+			//this.addEventListener(Event.A_BUTTON_DOWN, this.pauseButton.togglePause);
 
 			var bg = new Sprite(screenWidth, screenHeight);
 			bg.image = game.assets['img/gameBg.png'];
@@ -272,7 +274,7 @@ window.onload = function() {
 			this.addChild(this.fireGroup);
 			this.addChild(car);
 			this.addChild(scoreLabel);
-			this.addChild(pauseButton);
+			this.addChild(this.pauseButton);
 
 			// Touch listener
 			this.addEventListener(Event.TOUCH_MOVE, this.handleTouchMove);
@@ -326,7 +328,7 @@ window.onload = function() {
 					return 8 + Math.floor(Math.random() * 6); 
 
 				case 'enemyCoin':
-					return 5 + Math.floor(Math.random() * 4);
+					return 3 + Math.floor(Math.random() * 4);
 
 				case 'bomb':
 					return 3 + Math.floor(Math.random() * 3);
