@@ -1,7 +1,5 @@
 # Racer Doge
 
-## NOTE: This game is very much a work in progress
-
 ## About
 Web / Chrome / Firefox racing game, featuring a Doge! Wow.
 
