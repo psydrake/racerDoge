@@ -15,14 +15,16 @@ This project is organized to make use of the Cordova command line tools (version
 
 ## Building and Running
 To upload it to Amazon s3 bucket
-`webapp/packageAndMerge.sh`		- copy relevant files into `webapp/www` directory
-`webapp/syncWebApp.sh`			- upload files into Amazon s3 bucket, using aws command line tools
+
+* `$ webapp/packageAndMerge.sh`		- copy relevant files into `webapp/www` directory
+* `$ webapp/syncWebApp.sh`			- upload files into Amazon s3 bucket, using aws command line tools
 
 ## Prerequisite for running syncWebApp.sh
 Installing Amazon AWS command line tools. On Ubuntu Linux:
-`$ sudo apt-get -y install python-pip`
-`$ pip install --upgrade --user awscli`
-`$ aws configure`				- enter AWS Access Key ID and/or AWS Secret Access Key 
+
+* `$ sudo apt-get -y install python-pip`
+* `$ pip install --upgrade --user awscli`
+* `$ aws configure`				- enter AWS Access Key ID and/or AWS Secret Access Key 
 
 ## Author
 Drake Emko - drakee (a) gmail.com
