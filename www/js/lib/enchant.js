@@ -5609,7 +5609,8 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
      */
     play: function(dup) {
         if (this._state === 1 && !dup) {
-            this.src.disconnect(this.connectTarget);
+            //this.src.disconnect(this.connectTarget); // this caused: Uncaught DOMException: Failed to execute 'disconnect' on 'AudioNode': the given destination is not connected.
+            this.src.disconnect();
         }
         if (this._state !== 2) {
             this._currentTime = 0;
