@@ -10,14 +10,14 @@ This project is organized to make use of the Cordova command line tools (version
 * `webapp/chrome`		- metadata files for the Chrome hosted web app, including the manifest and icons
 
 ## Building and Running
-To run the app locally
+To run the app locally:
 
 * `$ cd webapp/`						- go to webapp directory under project root
 * `$ webapp/packageAndMerge.sh`			- copy relevant files into `webapp/www` directory
 * `$ python -m SimpleHTTPServer 8000`	- run local web server on port 8000 (this works on MacOS - if you don't have this, run any web server, on any port)
-* On your web browser, enter http://localhost:8000 in the address bar
+* On your web browser, enter `http://localhost:8000` in the address bar
 
-To upload it to Amazon s3 bucket
+To upload it to the racerDoge Amazon s3 bucket (NOTE: you won't have credentials for this; change `webapp/syncWebApp.sh` to point to your s3 bucket if you want):
 
 * `$ cd webapp/`					- go to webapp directory under project root
 * `$ webapp/packageAndMerge.sh`		- copy relevant files into `webapp/www` directory
