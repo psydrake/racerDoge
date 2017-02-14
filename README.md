@@ -29,4 +29,4 @@ Installing Amazon AWS command line tools. On Ubuntu Linux:
 ## Author
 Drake Emko - drakee (a) gmail.com
 * [@DrakeEmko](https://twitter.com/DrakeEmko)
-
+* [Wolfgirl Band](http://wolfgirl.bandcamp.com/)
