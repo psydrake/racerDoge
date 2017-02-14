@@ -30,6 +30,9 @@ Install Amazon AWS command line tools. On Ubuntu Linux:
 * `$ pip install --upgrade --user awscli`
 * `$ aws configure`				- enter AWS Access Key ID and/or AWS Secret Access Key 
 
+## Updates
+2/13/2017: Fixed source of crashes (hopefully!) so the game should run without stopping unexpectedly. Thank you everybody for your feedback!
+
 ## Author
 Drake Emko - drakee (a) gmail.com
 * [@DrakeEmko](https://twitter.com/DrakeEmko)
